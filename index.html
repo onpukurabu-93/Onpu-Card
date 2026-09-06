@@ -1281,7 +1281,7 @@ function pressKey(key, button) {
     showCorrectAnimation();
 
     /*
-      カード音開始から約2秒後に正解音。
+      カード音開始から約1秒後に正解音。
       正解音を聞いてから次の問題へ進む。
     */
     nextTrainingTimer = setTimeout(() => {
@@ -1290,7 +1290,7 @@ function pressKey(key, button) {
         showRandomTrainingQuestion();
       }
 
-    }, 3000);
+    }, 1500);
 
     return;
   }
@@ -1328,7 +1328,7 @@ function playSound(filename) {
    トレーニング正解音
 
    カード音は sharedAudio で再生。
-   正解音は別audioで約2秒後に再生するため、
+   正解音は別audioで約1秒後に再生するため、
    カード音を途中で切らない。
 ========================================================= */
 
@@ -1363,7 +1363,7 @@ function playTrainingCorrectSound(cardSound) {
   });
 
 
-  /* 約2秒後に正解音 */
+  /* 約1秒後に正解音 */
 
   trainingChimeTimer = setTimeout(() => {
 
@@ -1380,7 +1380,7 @@ function playTrainingCorrectSound(cardSound) {
       console.log("正解音再生エラー", error);
     });
 
-  }, 2000);
+  }, 1000);
 
 }
 
