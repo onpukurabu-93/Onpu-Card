@@ -36,8 +36,11 @@ body {
 .app-container {
   width: 100%;
   max-width: 420px;
-  height: 100vh;
-  max-height: 850px;
+
+  /* 画面切れ対策 */
+  height: 100dvh;
+  max-height: 100dvh;
+
   background: #fdf8ed;
   border-radius: 24px;
   overflow: hidden;
@@ -175,6 +178,7 @@ body {
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -460,6 +464,7 @@ body {
 <body>
 
 <audio id="sharedAudio" preload="auto"></audio>
+<audio id="correctAudio" preload="auto" src="seikai.mp3"></audio>
 
 <div class="app-container">
 
@@ -836,6 +841,9 @@ let trainingMode = false;
 let trainingLocked = false;
 let lastTrainingIndex = -1;
 
+let trainingChimeTimer = null;
+let nextTrainingTimer = null;
+
 
 /* =========================================================
    画面切り替え
@@ -854,6 +862,16 @@ function hideAllScreens() {
 function showSelectScreen() {
 
   hideAllScreens();
+
+  if (trainingChimeTimer) {
+    clearTimeout(trainingChimeTimer);
+    trainingChimeTimer = null;
+  }
+
+  if (nextTrainingTimer) {
+    clearTimeout(nextTrainingTimer);
+    nextTrainingTimer = null;
+  }
 
   document
     .getElementById("selectScreen")
@@ -984,6 +1002,16 @@ function showLevelScreen() {
 
   hideAllScreens();
 
+  if (trainingChimeTimer) {
+    clearTimeout(trainingChimeTimer);
+    trainingChimeTimer = null;
+  }
+
+  if (nextTrainingTimer) {
+    clearTimeout(nextTrainingTimer);
+    nextTrainingTimer = null;
+  }
+
   document
     .getElementById("levelScreen")
     .classList.remove("hidden");
@@ -1007,6 +1035,16 @@ function startLevel(level) {
   trainingMode = false;
   trainingLocked = false;
   lastTrainingIndex = -1;
+
+  if (trainingChimeTimer) {
+    clearTimeout(trainingChimeTimer);
+    trainingChimeTimer = null;
+  }
+
+  if (nextTrainingTimer) {
+    clearTimeout(nextTrainingTimer);
+    nextTrainingTimer = null;
+  }
 
   if (selectedClef === "treble") {
 
@@ -1117,6 +1155,16 @@ function startTraining() {
     return;
   }
 
+  if (trainingChimeTimer) {
+    clearTimeout(trainingChimeTimer);
+    trainingChimeTimer = null;
+  }
+
+  if (nextTrainingTimer) {
+    clearTimeout(nextTrainingTimer);
+    nextTrainingTimer = null;
+  }
+
   trainingMode = true;
   trainingLocked = false;
   lastTrainingIndex = -1;
@@ -1138,6 +1186,16 @@ function showRandomTrainingQuestion() {
 
   if (!trainingMode || !currentCards.length) {
     return;
+  }
+
+  if (trainingChimeTimer) {
+    clearTimeout(trainingChimeTimer);
+    trainingChimeTimer = null;
+  }
+
+  if (nextTrainingTimer) {
+    clearTimeout(nextTrainingTimer);
+    nextTrainingTimer = null;
   }
 
   let newIndex;
@@ -1217,18 +1275,22 @@ function pressKey(key, button) {
 
     trainingLocked = true;
 
-    /* カード音 → 正解音の順番で再生 */
+    /* カード音をすぐ再生 */
     playTrainingCorrectSound(card.sound);
 
     showCorrectAnimation();
 
-    setTimeout(() => {
+    /*
+      カード音開始から約2秒後に正解音。
+      正解音を聞いてから次の問題へ進む。
+    */
+    nextTrainingTimer = setTimeout(() => {
 
       if (trainingMode) {
         showRandomTrainingQuestion();
       }
 
-    }, 1000);
+    }, 3000);
 
     return;
   }
@@ -1264,73 +1326,61 @@ function playSound(filename) {
 
 /* =========================================================
    トレーニング正解音
-   1つのaudio要素で
-   カード音 → 正解音
+
+   カード音は sharedAudio で再生。
+   正解音は別audioで約2秒後に再生するため、
+   カード音を途中で切らない。
 ========================================================= */
 
 const sharedAudio =
   document.getElementById("sharedAudio");
 
+const correctAudio =
+  document.getElementById("correctAudio");
+
 
 function playTrainingCorrectSound(cardSound) {
 
-  let correctPlayed = false;
-
-
-  function playCorrect() {
-
-    if (correctPlayed) {
-      return;
-    }
-
-    correctPlayed = true;
-
-    sharedAudio.pause();
-
-    sharedAudio.src =
-      "seikai.mp3";
-
-    sharedAudio.currentTime = 0;
-
-    sharedAudio.play().catch(error => {
-      console.log("正解音再生エラー", error);
-    });
-
+  if (trainingChimeTimer) {
+    clearTimeout(trainingChimeTimer);
+    trainingChimeTimer = null;
   }
 
+  /* カード音をすぐ再生 */
 
   sharedAudio.pause();
 
-  sharedAudio.src = cardSound;
+  sharedAudio.src =
+    cardSound;
 
   sharedAudio.currentTime = 0;
 
-
-  sharedAudio.onended = () => {
-
-    sharedAudio.onended = null;
-
-    playCorrect();
-
-  };
-
-
-  sharedAudio.onerror = () => {
-
-    sharedAudio.onerror = null;
-
-    playCorrect();
-
-  };
-
+  sharedAudio.onended = null;
+  sharedAudio.onerror = null;
 
   sharedAudio.play().catch(error => {
-
     console.log("カード音再生エラー", error);
-
-    playCorrect();
-
   });
+
+
+  /* 約2秒後に正解音 */
+
+  trainingChimeTimer = setTimeout(() => {
+
+    trainingChimeTimer = null;
+
+    if (!trainingMode) {
+      return;
+    }
+
+    correctAudio.pause();
+    correctAudio.currentTime = 0;
+
+    correctAudio.play().catch(error => {
+      console.log("正解音再生エラー", error);
+    });
+
+  }, 2000);
 
 }
 
