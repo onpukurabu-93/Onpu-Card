@@ -479,6 +479,11 @@ body {
       音符を見て、読んでみよう
     </div>
 
+    <!-- はじめに -->
+    <button class="select-button" onclick="startIntroduction()">
+      🔰 はじめに
+    </button>
+
     <!-- 順番変更：ト音 → ヘ音 → 全カード -->
     <button class="select-button" onclick="selectClef('treble')">
       ト音記号
@@ -747,32 +752,35 @@ const levelDescriptions = {
    全カード用レベルデータ
 ========================================================= */
 
+/* はじめに用：現在の全カードLv.1 */
+const introductionCards = [
+
+  { name:"ど", key:"ド", img:"h_cdo.png", sound:"h_cdo.m4a" },
+  { name:"ド", key:"ド", img:"h_c00.png", sound:"h_c00.m4a" },
+  { name:"1点ド", key:"ド", img:"t_c1.png", sound:"t_c1.m4a" },
+  { name:"2点ド", key:"ド", img:"t_c2.png", sound:"t_c2.m4a" },
+  { name:"3点ド", key:"ド", img:"t_c3.png", sound:"t_c3.m4a" }
+
+];
+
+
 const allCards = {
 
-  /* 新Lv.1：ど・ド・1点ド・2点ド・3点ド */
+  /* 新Lv.1：旧Lv.2 */
   1: [
-    { name:"ど", key:"ド", img:"h_cdo.png", sound:"h_cdo.m4a" },
-    { name:"ド", key:"ド", img:"h_c00.png", sound:"h_c00.m4a" },
-    { name:"1点ド", key:"ド", img:"t_c1.png", sound:"t_c1.m4a" },
-    { name:"2点ド", key:"ド", img:"t_c2.png", sound:"t_c2.m4a" },
-    { name:"3点ド", key:"ド", img:"t_c3.png", sound:"t_c3.m4a" }
-  ],
-
-  /* 新Lv.2：旧Lv.1 */
-  2: [
     ...trebleCards[1],
     ...trebleCards[2],
     ...trebleCards[3]
   ],
 
-  /* 新Lv.3：旧Lv.2 */
-  3: [
+  /* 新Lv.2：旧Lv.3 */
+  2: [
     ...trebleCards[4],
     ...bassCards[4]
   ],
 
-  /* 新Lv.4：旧Lv.3 */
-  4: [
+  /* 新Lv.3：旧Lv.4 */
+  3: [
     { name:"大文字ラ", key:"ラ", img:"h_aRa1.png", sound:"h_aRa1.m4a" },
     { name:"大文字シ", key:"シ", img:"h_bSi1.png", sound:"h_bSi1.m4a" },
     { name:"ど", key:"ド", img:"h_cdo.png", sound:"h_cdo.m4a" },
@@ -792,8 +800,8 @@ const allCards = {
     { name:"1点ド", key:"ド", img:"h_c1.png", sound:"h_c1.m4a" }
   ],
 
-  /* 新Lv.5：旧Lv.4 */
-  5: [
+  /* 新Lv.4：旧Lv.5 */
+  4: [
     ...trebleCards[1],
     ...trebleCards[2],
     ...trebleCards[3],
@@ -808,20 +816,18 @@ const allCards = {
 
 
 /* =========================================================
-   レベル説明
+   全カード用レベル説明
 ========================================================= */
 
 const allLevelDescriptions = {
 
-  1: "ど・ド・1点ド・2点ド・3点ド",
+  1: "ト音記号：1点ド・1点レ・1点ミ・1点ファ・1点ソ・1点ラ・1点シ・2点ド・2点レ・2点ミ・2点ファ・2点ソ・2点ラ・2点シ・3点ド・3点レ・3点ミ",
 
-  2: "ト音記号：1点ド・1点レ・1点ミ・1点ファ・1点ソ・1点ラ・1点シ・2点ド・2点レ・2点ミ・2点ファ・2点ソ・2点ラ・2点シ・3点ド・3点レ・3点ミ",
+  2: "ト音記号：ミ・ファ・ソ・ラ・シ・1点ド・1点レ・1点ミ・1点ファ ／ ヘ音記号：1点ファ・1点ミ・1点レ・1点ド・シ・ラ・ソ・ファ・ミ",
 
-  3: "ト音記号：ミ・ファ・ソ・ラ・シ・1点ド・1点レ・1点ミ・1点ファ ／ ヘ音記号：1点ファ・1点ミ・1点レ・1点ド・シ・ラ・ソ・ファ・ミ",
+  3: "ヘ音記号：大文字ラ・大文字シ・ど・れ・み・ふぁ・そ・ら・し・ド・レ・ミ・ファ・ソ・ラ・シ・1点ド",
 
-  4: "ヘ音記号：大文字ラ・大文字シ・ど・れ・み・ふぁ・そ・ら・し・ド・レ・ミ・ファ・ソ・ラ・シ・1点ド",
-
-  5: "ト音記号・ヘ音記号 全て"
+  4: "ト音記号・ヘ音記号 全て"
 
 };
 
@@ -884,6 +890,48 @@ function showSelectScreen() {
 }
 
 
+/* =========================================================
+   はじめに
+========================================================= */
+
+function startIntroduction() {
+
+  selectedClef = "introduction";
+  selectedLevel = 0;
+  currentIndex = 0;
+
+  trainingMode = false;
+  trainingLocked = false;
+  lastTrainingIndex = -1;
+
+  if (trainingChimeTimer) {
+    clearTimeout(trainingChimeTimer);
+    trainingChimeTimer = null;
+  }
+
+  if (nextTrainingTimer) {
+    clearTimeout(nextTrainingTimer);
+    nextTrainingTimer = null;
+  }
+
+  currentCards = introductionCards;
+
+  hideAllScreens();
+
+  const cardScreen =
+    document.getElementById("cardScreen");
+
+  cardScreen.classList.remove("hidden");
+  cardScreen.classList.remove("training-mode");
+
+  document
+    .getElementById("levelBadge")
+    .textContent = "🔰";
+
+  showCurrentCard();
+}
+
+
 function selectClef(clef) {
 
   selectedClef = clef;
@@ -919,7 +967,7 @@ function createLevelButtons() {
 
   if (selectedClef === "all") {
 
-    for (let level = 1; level <= 5; level++) {
+    for (let level = 1; level <= 4; level++) {
 
       const button =
         document.createElement("button");
@@ -1275,14 +1323,16 @@ function pressKey(key, button) {
 
     trainingLocked = true;
 
-    /* カード音をすぐ再生 */
+    /*
+      カード音・正解音・赤丸を
+      正解した瞬間に同時スタート
+    */
     playTrainingCorrectSound(card.sound);
 
     showCorrectAnimation();
 
     /*
-      カード音開始から約1秒後に正解音。
-      正解音を聞いてから次の問題へ進む。
+      1.5秒後に次の問題
     */
     nextTrainingTimer = setTimeout(() => {
 
@@ -1327,9 +1377,7 @@ function playSound(filename) {
 /* =========================================================
    トレーニング正解音
 
-   カード音は sharedAudio で再生。
-   正解音は別audioで約1秒後に再生するため、
-   カード音を途中で切らない。
+   カード音・正解音を同時に再生。
 ========================================================= */
 
 const sharedAudio =
@@ -1363,24 +1411,14 @@ function playTrainingCorrectSound(cardSound) {
   });
 
 
-  /* 約1秒後に正解音 */
+  /* 正解音もすぐ再生 */
 
-  trainingChimeTimer = setTimeout(() => {
+  correctAudio.pause();
+  correctAudio.currentTime = 0;
 
-    trainingChimeTimer = null;
-
-    if (!trainingMode) {
-      return;
-    }
-
-    correctAudio.pause();
-    correctAudio.currentTime = 0;
-
-    correctAudio.play().catch(error => {
-      console.log("正解音再生エラー", error);
-    });
-
-  }, 1000);
+  correctAudio.play().catch(error => {
+    console.log("正解音再生エラー", error);
+  });
 
 }
 
