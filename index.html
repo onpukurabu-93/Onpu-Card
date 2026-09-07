@@ -252,13 +252,13 @@ body {
   overflow: hidden;
 }
 
-/* ★画像と隠し部分を同じ大きさで管理 */
+/* ★カード画像本来の大きさを維持 */
 .note-card-wrap {
   position: relative;
   display: inline-block;
+  line-height: 0;
   max-width: 100%;
   max-height: 100%;
-  line-height: 0;
 }
 
 .note-card-img {
@@ -280,7 +280,7 @@ body {
   right: 0;
   bottom: 0;
 
-  /* 五線・音符を下の方まで見せる */
+  /* 今まで通り64％ */
   top: 64%;
 
   background: white;
@@ -1032,8 +1032,8 @@ function createLevelButtons() {
     const description =
       document.createElement("span");
 
-    description.className =
-      "level-description";
+      description.className =
+        "level-description";
 
     if (selectedClef === "treble") {
 
