@@ -36,11 +36,8 @@ body {
 .app-container {
   width: 100%;
   max-width: 420px;
-
-  /* 画面切れ対策 */
   height: 100dvh;
   max-height: 100dvh;
-
   background: #fdf8ed;
   border-radius: 24px;
   overflow: hidden;
@@ -255,7 +252,17 @@ body {
   overflow: hidden;
 }
 
+/* ★画像と隠し部分を同じ大きさで管理 */
+.note-card-wrap {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  max-height: 100%;
+  line-height: 0;
+}
+
 .note-card-img {
+  display: block;
   max-width: 100%;
   max-height: 100%;
   width: auto;
@@ -278,6 +285,7 @@ body {
 
   background: white;
   z-index: 6;
+  pointer-events: none;
 }
 
 /* 正解時の赤丸 */
@@ -565,17 +573,22 @@ body {
         ‹
       </button>
 
-      <img
-        id="noteCardImg"
-        class="note-card-img"
-        src=""
-        alt="音符カード"
-      >
+      <!-- ★画像とマスクを同じラッパー内に配置 -->
+      <div class="note-card-wrap">
 
-      <div
-        id="trainingCover"
-        class="training-cover hidden"
-      ></div>
+        <img
+          id="noteCardImg"
+          class="note-card-img"
+          src=""
+          alt="音符カード"
+        >
+
+        <div
+          id="trainingCover"
+          class="training-cover hidden"
+        ></div>
+
+      </div>
 
       <div
         id="correctCircle"
