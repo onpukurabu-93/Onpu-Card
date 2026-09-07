@@ -252,13 +252,18 @@ body {
   overflow: hidden;
 }
 
-/* ★カード画像本来の大きさを維持 */
+/*
+  ★カード画像とマスクを同じ大きさで扱う
+  出題時・答え表示時で画像倍率が変わらない
+*/
 .note-card-wrap {
   position: relative;
-  display: inline-block;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   line-height: 0;
-  max-width: 100%;
-  max-height: 100%;
 }
 
 .note-card-img {
@@ -273,22 +278,27 @@ body {
   pointer-events: none;
 }
 
-/* トレーニング時に音名・鍵盤図を隠す */
+/*
+  ★トレーニング時に音名・鍵盤図を隠す
+
+  マスクは画像の下側64％から下を隠す。
+  画像自体の倍率は通常表示と変わらない。
+*/
 .training-cover {
   position: absolute;
+  width: 100%;
+  height: 36%;
   left: 0;
-  right: 0;
   bottom: 0;
-
-  /* 今まで通り64％ */
-  top: 64%;
-
   background: white;
   z-index: 6;
   pointer-events: none;
 }
 
-/* 正解時の赤丸 */
+/* -------------------------
+   正解時の赤丸
+------------------------- */
+
 .correct-circle {
   position: absolute;
   width: 160px;
@@ -1032,8 +1042,8 @@ function createLevelButtons() {
     const description =
       document.createElement("span");
 
-      description.className =
-        "level-description";
+    description.className =
+      "level-description";
 
     if (selectedClef === "treble") {
 
