@@ -101,21 +101,21 @@ body {
   color: #5b4636;
   font-size: 32px;
   font-weight: 700;
-  margin: 30px 0 15px;
+  margin: 20px 0 10px;
 }
 
 .main-subtitle {
   text-align: center;
   color: #806c5a;
   font-size: 15px;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
 }
 
 .profile-box {
   background: white;
   border-radius: 16px;
   padding: 14px;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   text-align: center;
 }
@@ -157,14 +157,19 @@ body {
   width: 100%;
   border: none;
   border-radius: 18px;
-  padding: 16px 12px;
-  margin-bottom: 12px;
+  padding: 15px 12px;
+  margin-bottom: 10px;
   background: white;
   color: #5b4636;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 700;
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   cursor: pointer;
+}
+
+.select-button.accent {
+  background: #78a9c8;
+  color: white;
 }
 
 .select-button:active {
@@ -271,10 +276,6 @@ body {
   white-space: nowrap;
 }
 
-/* -------------------------
-   トレーニングボタン
-------------------------- */
-
 .training-btn {
   border: none;
   background: #eadcc8;
@@ -290,10 +291,6 @@ body {
 .training-btn:active {
   transform: scale(0.96);
 }
-
-/* -------------------------
-   音符カード
-------------------------- */
 
 .card-area {
   flex: 1;
@@ -344,10 +341,6 @@ body {
 .training-cover.reveal {
   opacity: 0;
 }
-
-/* -------------------------
-   正解時の赤丸・コンボ
-------------------------- */
 
 .correct-circle {
   position: absolute;
@@ -473,17 +466,12 @@ body {
   z-index: 20;
 }
 
+.card-screen.training-mode .arrow { display: none; }
+.card-screen.training-mode .training-btn { background: #d8c4a8; }
+
 /* -------------------------
    モーダル・画面各種
 ------------------------- */
-
-.card-screen.training-mode .arrow {
-  display: none;
-}
-
-.card-screen.training-mode .training-btn {
-  background: #d8c4a8;
-}
 
 .modal-bg {
   position: fixed;
@@ -570,6 +558,7 @@ body {
   justify-content: center;
   height: 100%;
   text-align: center;
+  position: relative;
 }
 
 .result-title {
@@ -591,6 +580,53 @@ body {
   font-weight: 700;
   margin-bottom: 24px;
 }
+
+/* -------------------------
+   成績確認画面
+------------------------- */
+
+.score-card {
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.score-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #5b4636;
+  margin-bottom: 10px;
+  border-bottom: 2px solid #fdf8ed;
+  padding-bottom: 6px;
+}
+
+.score-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #806c5a;
+  margin-bottom: 6px;
+}
+
+.score-row strong {
+  color: #5b4636;
+}
+
+/* -------------------------
+   紙吹雪（クラッカー）演出
+------------------------- */
+
+#confettiCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 50;
+}
 </style>
 </head>
 
@@ -598,25 +634,25 @@ body {
 
 <audio id="sharedAudio" preload="auto"></audio>
 <audio id="correctAudio" preload="auto" src="seikai.mp3"></audio>
-<audio id="fanfareAudio" preload="auto" src="fanfare.mp3"></audio>
 
 <div class="app-container">
 
-  <!-- 選択画面 -->
+  <!-- トップ画面 -->
   <section id="selectScreen" class="screen">
     <div class="main-title">おんぷカード</div>
     <div class="main-subtitle">音符を見て、読んでみよう</div>
 
-    <!-- 教室ネーム・きょうだい切り替えボックス -->
+    <!-- プレイヤー切り替えボックス -->
     <div class="profile-box">
-      <div class="profile-label">プレイ中のきょうだい（教室ネーム）</div>
+      <div class="profile-label">プレイ中のプレイヤー（教室ネーム）</div>
       <div class="profile-current" id="currentProfileName">未設定</div>
       <select id="profileSelect" class="profile-select" onchange="switchProfile(this.value)">
-        <option value="">-- お子様を選択 --</option>
+        <option value="">-- プレイヤーを選択 --</option>
       </select>
       <button class="profile-edit-btn" onclick="openProfileModal()">✏️ 教室ネームを登録・変更する</button>
     </div>
 
+    <button class="select-button accent" onclick="showScoreScreen()">🏆 せいせき・ランキングをみる</button>
     <button class="select-button" onclick="startIntroduction()">🔰 はじめに</button>
     <button class="select-button" onclick="selectClef('treble')">ト音記号</button>
     <button class="select-button" onclick="selectClef('bass')">ヘ音記号</button>
@@ -631,6 +667,17 @@ body {
       <div class="header-spacer"></div>
     </div>
     <div id="levelList" class="level-list"></div>
+  </section>
+
+  <!-- 成績確認画面 -->
+  <section id="scoreScreen" class="screen hidden">
+    <div class="header">
+      <button class="back-btn" onclick="showSelectScreen()">＜ 戻る</button>
+      <div class="header-title">せいせき</div>
+      <div class="header-spacer"></div>
+    </div>
+
+    <div id="scoreContent"></div>
   </section>
 
   <!-- カード画面 -->
@@ -669,6 +716,7 @@ body {
 
   <!-- リザルト画面 -->
   <section id="resultScreen" class="screen hidden">
+    <canvas id="confettiCanvas"></canvas>
     <div class="result-container">
       <div class="result-title" id="resultTitle">🎉 クリア！</div>
       <div class="result-detail" id="resultScore">正答率: 100%</div>
@@ -684,13 +732,13 @@ body {
 <!-- 教室ネーム登録モーダル -->
 <div id="profileModal" class="modal-bg hidden">
   <div class="modal-box">
-    <div class="modal-title">教室ネーム登録（最大3人）</div>
+    <div class="modal-title">プレイヤー登録（最大3人）</div>
     <select id="slotSelect" class="modal-input">
-      <option value="0">お子様 1</option>
-      <option value="1">お子様 2</option>
-      <option value="2">お子様 3</option>
+      <option value="0">プレイヤー 1</option>
+      <option value="1">プレイヤー 2</option>
+      <option value="2">プレイヤー 3</option>
     </select>
-    <input type="text" id="profileInputName" class="modal-input" placeholder="例: ピアノのすきなこ">
+    <input type="text" id="profileInputName" class="modal-input" placeholder="例: ピアノねこ">
     <button class="modal-btn" onclick="saveProfile()">登録する</button>
   </div>
 </div>
@@ -883,7 +931,7 @@ let currentCombo = 0;
 
 function initProfiles() {
   const select = document.getElementById("profileSelect");
-  select.innerHTML = '<option value="">-- お子様を選択 --</option>';
+  select.innerHTML = '<option value="">-- プレイヤーを選択 --</option>';
 
   let hasValid = false;
   profiles.forEach((name, idx) => {
@@ -891,7 +939,7 @@ function initProfiles() {
       hasValid = true;
       const opt = document.createElement("option");
       opt.value = idx;
-      opt.textContent = `お子様 ${idx+1}: ${name}`;
+      opt.textContent = `プレイヤー ${idx+1}: ${name}`;
       if (idx === activeProfileIndex) opt.selected = true;
       select.appendChild(opt);
     }
@@ -961,7 +1009,7 @@ function showSelectScreen() {
 
 function startIntroduction() {
   if (!profiles[activeProfileIndex]) {
-    alert("先に教室ネームを登録してください！");
+    alert("先に教室ネーム（プレイヤー）を登録してください！");
     openProfileModal();
     return;
   }
@@ -984,7 +1032,7 @@ function startIntroduction() {
 
 function selectClef(clef) {
   if (!profiles[activeProfileIndex]) {
-    alert("先に教室ネームを登録してください！");
+    alert("先に教室ネーム（プレイヤー）を登録してください！");
     openProfileModal();
     return;
   }
@@ -1007,7 +1055,6 @@ function createLevelButtons() {
   const isAll = (selectedClef === "all");
   const descriptions = isAll ? allLevelDescriptions : levelDescriptions[selectedClef];
 
-  // レベル解放チェック（Lv1は常に解放、Lv2以降は前のレベルで正答率90%以上）
   for (let level = 1; level <= 4; level++) {
     const button = document.createElement("button");
     button.className = "level-button";
@@ -1165,11 +1212,10 @@ function showRandomTrainingQuestion() {
   if (currentCards.length === 1) {
     newIndex = 0;
   } else {
-    // 苦手なもの（ミス回数が多いもの）ほど選ばれやすくする重み付け
     const weights = currentCards.map(card => {
       const mistakeKey = `onpu_mistake_${activeProfileIndex}_${card.id}`;
       const misses = parseInt(localStorage.getItem(mistakeKey)) || 0;
-      return misses + 1; // 基本ウェイト1 + ミス回数
+      return misses + 1;
     });
 
     const totalWeight = weights.reduce((a, b) => a + b, 0);
@@ -1183,7 +1229,6 @@ function showRandomTrainingQuestion() {
         break;
       }
     }
-    // 直前と同じ問題なら再抽選
     if (newIndex === lastTrainingIndex && currentCards.length > 1) {
       newIndex = (newIndex + 1) % currentCards.length;
     }
@@ -1217,7 +1262,6 @@ function pressKey(key, button) {
     if (trainingLocked) return;
 
     if (key !== card.key) {
-      // 不正解：ミス回数をプラス、コンボ途切れ、ボタン揺れ
       trainingMistakes++;
       currentCombo = 0;
       const mistakeKey = `onpu_mistake_${activeProfileIndex}_${card.id}`;
@@ -1231,12 +1275,11 @@ function pressKey(key, button) {
       return;
     }
 
-    // 正解
     trainingLocked = true;
     trainingQuestionCount++;
     currentCombo++;
 
-    // カバーを外して下部（答え）を見せる
+    // 正解時の答え自動チラ見せ
     document.getElementById("trainingCover").classList.add("reveal");
 
     playTrainingCorrectSound(card.sound);
@@ -1255,14 +1298,13 @@ function pressKey(key, button) {
     return;
   }
 
-  // 通常モード
   if (key !== card.key) return;
   playSound(card.sound);
   showCat(button);
 }
 
 /* =========================================================
-   リザルト・Googleスプレッドシート自動送信
+   リザルト・紙吹雪・GAS連携
 ========================================================= */
 
 function showResultScreen() {
@@ -1271,7 +1313,9 @@ function showResultScreen() {
   const totalAttempts = targetTotalQuestions + trainingMistakes;
   const accuracy = Math.max(0, Math.round((targetTotalQuestions / totalAttempts) * 100));
 
-  // ベストタイム・ハイスコア保存（きょうだい別・レベル別）
+  // 練習日数のカウント更新
+  recordPracticeDate();
+
   const bestKey = `onpu_best_${activeProfileIndex}_${selectedClef}_${selectedLevel}`;
   const savedBest = JSON.parse(localStorage.getItem(bestKey));
   let isNewRecord = false;
@@ -1281,7 +1325,6 @@ function showResultScreen() {
     localStorage.setItem(bestKey, JSON.stringify({ accuracy, time: elapsedTime, count: targetTotalQuestions }));
   }
 
-  // 画面表示更新
   hideAllScreens();
   document.getElementById("resultScore").textContent = `正答率: ${accuracy}% （正解 ${targetTotalQuestions}問 / ミス ${trainingMistakes}回）`;
   document.getElementById("resultTime").textContent = `タイム: ${elapsedTime} 秒`;
@@ -1289,14 +1332,16 @@ function showResultScreen() {
   const bestEl = document.getElementById("resultBest");
   if (isNewRecord) {
     bestEl.textContent = "✨ 過去最高記録更新！";
-    playFanfare();
   } else {
-    bestEl.textContent = savedBest ? `自己ベスト: 正答率 ${savedBest.accuracy}% (${savedBest.time}秒)` : "";
+    bestEl.textContent = savedBest ? `ベスト記録: 正答率 ${savedBest.accuracy}% (${savedBest.time}秒)` : "";
   }
 
   document.getElementById("resultScreen").classList.remove("hidden");
 
-  // 【自動送信】Googleスプレッドシート（先生の管理用）へ練習結果を送信
+  // クラッカー（紙吹雪）アニメーションを起動
+  startConfetti();
+
+  // Googleスプレッドシートへの自動データ送信
   sendDataToGoogleSheet({
     name: profiles[activeProfileIndex],
     clef: selectedClef,
@@ -1308,8 +1353,17 @@ function showResultScreen() {
   });
 }
 
+function recordPracticeDate() {
+  const dateKey = `onpu_days_${activeProfileIndex}`;
+  let days = JSON.parse(localStorage.getItem(dateKey)) || [];
+  const today = new Date().toISOString().split('T')[0];
+  if (!days.includes(today)) {
+    days.push(today);
+    localStorage.setItem(dateKey, JSON.stringify(days));
+  }
+}
+
 function sendDataToGoogleSheet(data) {
-  // ※先生のGoogle Apps Script (GAS) のウェブアプリURLをここに貼り付けると自動送信されます
   const GAS_URL = "ここにGASのウェブアプリURLを貼り付け"; 
   if (GAS_URL.includes("ここ")) return;
 
@@ -1319,6 +1373,93 @@ function sendDataToGoogleSheet(data) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)
   }).catch(err => console.log("送信エラー", err));
+}
+
+/* =========================================================
+   紙吹雪（クラッカー）アニメーション処理
+========================================================= */
+
+function startConfetti() {
+  const canvas = document.getElementById("confettiCanvas");
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.parentElement.clientWidth;
+  canvas.height = canvas.parentElement.clientHeight;
+
+  const pieces = [];
+  const colors = ['#e99595', '#e6b26a', '#d6c45d', '#8dbb8d', '#78a9c8', '#b28bb9'];
+
+  for (let i = 0; i < 60; i++) {
+    pieces.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height - canvas.height,
+      size: Math.random() * 8 + 4,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      speed: Math.random() * 3 + 2,
+      rotation: Math.random() * 360,
+      rotSpeed: Math.random() * 6 - 3
+    });
+  }
+
+  let animationFrame;
+  let timer = 0;
+
+  function update() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    timer++;
+
+    pieces.forEach(p => {
+      p.y += p.speed;
+      p.rotation += p.rotSpeed;
+
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate((p.rotation * Math.PI) / 180);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+      ctx.restore();
+    });
+
+    if (timer < 180) { // 約3秒間降らせる
+      animationFrame = requestAnimationFrame(update);
+    } else {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  }
+
+  update();
+}
+
+/* =========================================================
+   成績確認画面の描画
+========================================================= */
+
+function showScoreScreen() {
+  hideAllScreens();
+  const container = document.getElementById("scoreContent");
+  container.innerHTML = "";
+
+  // 1. プレイヤー別タイム比較
+  let rankHtml = `<div class="score-card"><div class="score-card-title">🏆 プレイヤー比較（ト音記号 Lv1ベスト）</div>`;
+  profiles.forEach((name, idx) => {
+    if (name) {
+      const best = JSON.parse(localStorage.getItem(`onpu_best_${idx}_treble_1`));
+      const val = best ? `${best.time} 秒 (${best.accuracy}%)` : "未クリア";
+      rankHtml += `<div class="score-row"><span>${name}</span><strong>${val}</strong></div>`;
+    }
+  });
+  rankHtml += `</div>`;
+
+  // 2. 現在のプレイヤーのがんばり
+  const activeName = profiles[activeProfileIndex] || "未選択";
+  const days = JSON.parse(localStorage.getItem(`onpu_days_${activeProfileIndex}`)) || [];
+
+  let activeHtml = `<div class="score-card">
+    <div class="score-card-title">📅 ${activeName} さんの練習記録</div>
+    <div class="score-row"><span>今月の練習日数</span><strong>${days.length} 日</strong></div>
+  </div>`;
+
+  container.innerHTML = rankHtml + activeHtml;
+  document.getElementById("scoreScreen").classList.remove("hidden");
 }
 
 /* =========================================================
@@ -1333,7 +1474,6 @@ function playSound(filename) {
 
 const sharedAudio = document.getElementById("sharedAudio");
 const correctAudio = document.getElementById("correctAudio");
-const fanfareAudio = document.getElementById("fanfareAudio");
 
 function playTrainingCorrectSound(cardSound) {
   if (trainingChimeTimer) clearTimeout(trainingChimeTimer);
@@ -1345,12 +1485,6 @@ function playTrainingCorrectSound(cardSound) {
   correctAudio.pause();
   correctAudio.currentTime = 0;
   correctAudio.play().catch(() => {});
-}
-
-function playFanfare() {
-  fanfareAudio.pause();
-  fanfareAudio.currentTime = 0;
-  fanfareAudio.play().catch(() => {});
 }
 
 function showCorrectAnimation() {
