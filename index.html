@@ -252,10 +252,6 @@ body {
   overflow: hidden;
 }
 
-/*
-  ★カード画像とマスクを同じ大きさで扱う
-  出題時・答え表示時で画像倍率が変わらない
-*/
 .note-card-wrap {
   position: relative;
   width: 100%;
@@ -278,12 +274,6 @@ body {
   pointer-events: none;
 }
 
-/*
-  ★トレーニング時に音名・鍵盤図を隠す
-
-  マスクは画像の下側64％から下を隠す。
-  画像自体の倍率は通常表示と変わらない。
-*/
 .training-cover {
   position: absolute;
   width: 100%;
@@ -318,32 +308,20 @@ body {
 }
 
 @keyframes correctCircle {
-
   0% {
-    transform:
-      translate(-50%, -50%)
-      scale(0.2);
+    transform: translate(-50%, -50%) scale(0.2);
     opacity: 0;
   }
-
   45% {
-    transform:
-      translate(-50%, -50%)
-      scale(1.12);
+    transform: translate(-50%, -50%) scale(1.12);
     opacity: 1;
   }
-
   70% {
-    transform:
-      translate(-50%, -50%)
-      scale(0.96);
+    transform: translate(-50%, -50%) scale(0.96);
     opacity: 1;
   }
-
   100% {
-    transform:
-      translate(-50%, -50%)
-      scale(1);
+    transform: translate(-50%, -50%) scale(1);
     opacity: 1;
   }
 }
@@ -402,35 +380,24 @@ body {
   transform: scale(0.96);
 }
 
-.key-do {
-  background: #e99595;
+.key-btn.shake {
+  animation: keyShake 0.3s ease-in-out;
 }
 
-.key-re {
-  background: #e6b26a;
+@keyframes keyShake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
 }
 
-.key-mi {
-  background: #d6c45d;
-}
+.key-do { background: #e99595; }
+.key-re { background: #e6b26a; }
+.key-mi { background: #d6c45d; }
+.key-fa { background: #8dbb8d; }
+.key-so { background: #78a9c8; }
+.key-la { background: #9292c7; }
+.key-si { background: #b28bb9; }
 
-.key-fa {
-  background: #8dbb8d;
-}
-
-.key-so {
-  background: #78a9c8;
-}
-
-.key-la {
-  background: #9292c7;
-}
-
-.key-si {
-  background: #b28bb9;
-}
-
-/* 猫 */
 .cat {
   position: absolute;
   width: 45px;
@@ -444,7 +411,7 @@ body {
 }
 
 /* -------------------------
-   トレーニング中
+   トレーニング中・結果画面
 ------------------------- */
 
 .card-screen.training-mode .arrow {
@@ -455,27 +422,46 @@ body {
   background: #d8c4a8;
 }
 
-/* -------------------------
-   スマホ
-------------------------- */
+.result-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+}
+
+.result-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #5b4636;
+  margin-bottom: 24px;
+}
+
+.result-score {
+  font-size: 22px;
+  color: #806c5a;
+  margin-bottom: 12px;
+}
+
+.result-time {
+  font-size: 20px;
+  color: #806c5a;
+  margin-bottom: 36px;
+}
 
 @media (max-height: 700px) {
-
   .main-title {
     margin-top: 25px;
     margin-bottom: 25px;
   }
-
   .select-button {
     padding: 14px;
   }
-
   .key-btn {
     min-height: 48px;
   }
-
 }
-
 </style>
 </head>
 
@@ -488,170 +474,70 @@ body {
 
   <!-- 選択画面 -->
   <section id="selectScreen" class="screen">
+    <div class="main-title">おんぷカード</div>
+    <div class="main-subtitle">音符を見て、読んでみよう</div>
 
-    <div class="main-title">
-      おんぷカード
-    </div>
-
-    <div class="main-subtitle">
-      音符を見て、読んでみよう
-    </div>
-
-    <!-- はじめに -->
-    <button class="select-button" onclick="startIntroduction()">
-      🔰 はじめに
-    </button>
-
-    <!-- 順番変更：ト音 → ヘ音 → 全カード -->
-    <button class="select-button" onclick="selectClef('treble')">
-      ト音記号
-    </button>
-
-    <button class="select-button" onclick="selectClef('bass')">
-      ヘ音記号
-    </button>
-
-    <button class="select-button" onclick="selectClef('all')">
-      全カード
-    </button>
-
+    <button class="select-button" onclick="startIntroduction()">🔰 はじめに</button>
+    <button class="select-button" onclick="selectClef('treble')">ト音記号</button>
+    <button class="select-button" onclick="selectClef('bass')">ヘ音記号</button>
+    <button class="select-button" onclick="selectClef('all')">全カード</button>
   </section>
-
 
   <!-- レベル選択画面 -->
   <section id="levelScreen" class="screen hidden">
-
     <div class="header">
-
-      <button class="back-btn" onclick="showSelectScreen()">
-        ＜ 戻る
-      </button>
-
-      <div class="header-title" id="levelTitle">
-        レベル
-      </div>
-
+      <button class="back-btn" onclick="showSelectScreen()">＜ 戻る</button>
+      <div class="header-title" id="levelTitle">レベル</div>
       <div class="header-spacer"></div>
-
     </div>
-
     <div id="levelList" class="level-list"></div>
-
   </section>
-
 
   <!-- カード画面 -->
   <section id="cardScreen" class="card-screen hidden">
-
     <div class="card-header">
-
-      <button class="card-back" onclick="showLevelScreen()">
-        ＜ 戻る
-      </button>
-
-      <div class="level-badge" id="levelBadge">
-        Lv.1
-      </div>
-
-      <div class="card-title">
-        おんぷカード
-      </div>
-
-      <button
-        id="trainingButton"
-        class="training-btn"
-        onclick="startTraining()"
-      >
-        トレーニング
-      </button>
-
+      <button class="card-back" onclick="showLevelScreen()">＜ 戻る</button>
+      <div class="level-badge" id="levelBadge">Lv.1</div>
+      <div class="card-title">おんぷカード</div>
+      <button id="trainingButton" class="training-btn" onclick="startTraining()">トレーニング</button>
     </div>
 
+    <div id="cardArea" class="card-area" ontouchstart="touchStart(event)" ontouchend="touchEnd(event)">
+      <button class="arrow arrow-left" onclick="previousCard()" aria-label="前のカード">‹</button>
 
-    <div
-      id="cardArea"
-      class="card-area"
-      ontouchstart="touchStart(event)"
-      ontouchend="touchEnd(event)"
-    >
-
-      <button
-        class="arrow arrow-left"
-        onclick="previousCard()"
-        aria-label="前のカード"
-      >
-        ‹
-      </button>
-
-      <!-- ★画像とマスクを同じラッパー内に配置 -->
       <div class="note-card-wrap">
-
-        <img
-          id="noteCardImg"
-          class="note-card-img"
-          src=""
-          alt="音符カード"
-        >
-
-        <div
-          id="trainingCover"
-          class="training-cover hidden"
-        ></div>
-
+        <img id="noteCardImg" class="note-card-img" src="" alt="音符カード">
+        <div id="trainingCover" class="training-cover hidden"></div>
       </div>
 
-      <div
-        id="correctCircle"
-        class="correct-circle"
-      ></div>
+      <div id="correctCircle" class="correct-circle"></div>
 
-      <button
-        class="arrow arrow-right"
-        onclick="nextCard()"
-        aria-label="次のカード"
-      >
-        ›
-      </button>
-
+      <button class="arrow arrow-right" onclick="nextCard()" aria-label="次のカード">›</button>
     </div>
-
 
     <div class="keyboard">
-
-      <button class="key-btn key-do" onclick="pressKey('ド', this)">
-        ド
-      </button>
-
-      <button class="key-btn key-re" onclick="pressKey('レ', this)">
-        レ
-      </button>
-
-      <button class="key-btn key-mi" onclick="pressKey('ミ', this)">
-        ミ
-      </button>
-
-      <button class="key-btn key-fa" onclick="pressKey('ファ', this)">
-        ファ
-      </button>
-
-      <button class="key-btn key-so" onclick="pressKey('ソ', this)">
-        ソ
-      </button>
-
-      <button class="key-btn key-la" onclick="pressKey('ラ', this)">
-        ラ
-      </button>
-
-      <button class="key-btn key-si" onclick="pressKey('シ', this)">
-        シ
-      </button>
-
+      <button class="key-btn key-do" onclick="pressKey('ド', this)">ド</button>
+      <button class="key-btn key-re" onclick="pressKey('レ', this)">レ</button>
+      <button class="key-btn key-mi" onclick="pressKey('ミ', this)">ミ</button>
+      <button class="key-btn key-fa" onclick="pressKey('ファ', this)">ファ</button>
+      <button class="key-btn key-so" onclick="pressKey('ソ', this)">ソ</button>
+      <button class="key-btn key-la" onclick="pressKey('ラ', this)">ラ</button>
+      <button class="key-btn key-si" onclick="pressKey('シ', this)">シ</button>
     </div>
+  </section>
 
+  <!-- リザルト画面 -->
+  <section id="resultScreen" class="screen hidden">
+    <div class="result-container">
+      <div class="result-title">🎉 クリア！</div>
+      <div class="result-score" id="resultScore">10問クリア！</div>
+      <div class="result-time" id="resultTime">タイム: 00.0秒</div>
+      <button class="select-button" onclick="startTraining()">もう一度挑戦する</button>
+      <button class="select-button" onclick="showSelectScreen()">トップへ戻る</button>
+    </div>
   </section>
 
 </div>
-
 
 <script>
 /* =========================================================
@@ -659,7 +545,6 @@ body {
 ========================================================= */
 
 const trebleCards = {
-
   1: [
     { name:"1点ド", key:"ド", img:"t_c1.png", sound:"t_c1.m4a" },
     { name:"1点レ", key:"レ", img:"t_d1.png", sound:"t_d1.m4a" },
@@ -670,7 +555,6 @@ const trebleCards = {
     { name:"1点シ", key:"シ", img:"t_b1.png", sound:"t_b1.m4a" },
     { name:"2点ド", key:"ド", img:"t_c2.png", sound:"t_c2.m4a" }
   ],
-
   2: [
     { name:"2点ド", key:"ド", img:"t_c2.png", sound:"t_c2.m4a" },
     { name:"2点レ", key:"レ", img:"t_d2.png", sound:"t_d2.m4a" },
@@ -681,13 +565,11 @@ const trebleCards = {
     { name:"2点シ", key:"シ", img:"t_b2.png", sound:"t_b2.m4a" },
     { name:"3点ド", key:"ド", img:"t_c3.png", sound:"t_c3.m4a" }
   ],
-
   3: [
     { name:"3点ド", key:"ド", img:"t_c3.png", sound:"t_c3.m4a" },
     { name:"3点レ", key:"レ", img:"t_d3.png", sound:"t_d3.m4a" },
     { name:"3点ミ", key:"ミ", img:"t_e3.png", sound:"t_e3.m4a" }
   ],
-
   4: [
     { name:"ミ", key:"ミ", img:"t_e.png", sound:"t_e.m4a" },
     { name:"ファ", key:"ファ", img:"t_f.png", sound:"t_f.m4a" },
@@ -699,12 +581,9 @@ const trebleCards = {
     { name:"1点ミ", key:"ミ", img:"t_e1.png", sound:"t_e1.m4a" },
     { name:"1点ファ", key:"ファ", img:"t_f1.png", sound:"t_f1.m4a" }
   ]
-
 };
 
-
 const bassCards = {
-
   1: [
     { name:"1点ド", key:"ド", img:"h_c1.png", sound:"h_c1.m4a" },
     { name:"シ", key:"シ", img:"h_b0.png", sound:"h_b0.m4a" },
@@ -715,7 +594,6 @@ const bassCards = {
     { name:"レ", key:"レ", img:"h_d.png", sound:"h_d.m4a" },
     { name:"ド", key:"ド", img:"h_c00.png", sound:"h_c00.m4a" }
   ],
-
   2: [
     { name:"ド", key:"ド", img:"h_c00.png", sound:"h_c00.m4a" },
     { name:"し", key:"シ", img:"h_bsi.png", sound:"h_bsi.m4a" },
@@ -726,13 +604,11 @@ const bassCards = {
     { name:"れ", key:"レ", img:"h_dre.png", sound:"h_dre.m4a" },
     { name:"ど", key:"ド", img:"h_cdo.png", sound:"h_cdo.m4a" }
   ],
-
   3: [
     { name:"ど", key:"ド", img:"h_cdo.png", sound:"h_cdo.m4a" },
     { name:"大文字シ", key:"シ", img:"h_bSi1.png", sound:"h_bSi1.m4a" },
     { name:"大文字ラ", key:"ラ", img:"h_aRa1.png", sound:"h_aRa1.m4a" }
   ],
-
   4: [
     { name:"1点ファ", key:"ファ", img:"h_f1.png", sound:"h_f1.m4a" },
     { name:"1点ミ", key:"ミ", img:"h_e1.png", sound:"h_e1.m4a" },
@@ -744,65 +620,43 @@ const bassCards = {
     { name:"ファ", key:"ファ", img:"h_f.png", sound:"h_f.m4a" },
     { name:"ミ", key:"ミ", img:"h_e.png", sound:"h_e.m4a" }
   ]
-
 };
 
-
-/* =========================================================
-   レベル説明
-========================================================= */
-
 const levelDescriptions = {
-
   treble: {
     1: "1点ド → 1点レ → 1点ミ → 1点ファ → 1点ソ → 1点ラ → 1点シ → 2点ド",
     2: "2点ド → 2点レ → 2点ミ → 2点ファ → 2点ソ → 2点ラ → 2点シ → 3点ド",
     3: "3点ド → 3点レ → 3点ミ",
     4: "ミ → ファ → ソ → ラ → シ → 1点ド → 1点レ → 1点ミ → 1点ファ"
   },
-
   bass: {
     1: "1点ド → シ → ラ → ソ → ファ → ミ → レ → ド",
     2: "ド → し → ら → そ → ふぁ → み → れ → ど",
     3: "ど → 大文字シ → 大文字ラ",
     4: "1点ファ → 1点ミ → 1点レ → 1点ド → シ → ラ → ソ → ファ → ミ"
   }
-
 };
 
-
-/* =========================================================
-   全カード用レベルデータ
-========================================================= */
-
-/* はじめに用：現在の全カードLv.1 */
+/* はじめに用（ヘ音記号の1点ドを追加） */
 const introductionCards = [
-
   { name:"ど", key:"ド", img:"h_cdo.png", sound:"h_cdo.m4a" },
   { name:"ド", key:"ド", img:"h_c00.png", sound:"h_c00.m4a" },
+  { name:"1点ド", key:"ド", img:"h_c1.png", sound:"h_c1.m4a" },
   { name:"1点ド", key:"ド", img:"t_c1.png", sound:"t_c1.m4a" },
   { name:"2点ド", key:"ド", img:"t_c2.png", sound:"t_c2.m4a" },
   { name:"3点ド", key:"ド", img:"t_c3.png", sound:"t_c3.m4a" }
-
 ];
 
-
 const allCards = {
-
-  /* 新Lv.1：旧Lv.2 */
   1: [
     ...trebleCards[1],
     ...trebleCards[2],
     ...trebleCards[3]
   ],
-
-  /* 新Lv.2：旧Lv.3 */
   2: [
     ...trebleCards[4],
     ...bassCards[4]
   ],
-
-  /* 新Lv.3：旧Lv.4 */
   3: [
     { name:"大文字ラ", key:"ラ", img:"h_aRa1.png", sound:"h_aRa1.m4a" },
     { name:"大文字シ", key:"シ", img:"h_bSi1.png", sound:"h_bSi1.m4a" },
@@ -822,8 +676,6 @@ const allCards = {
     { name:"シ", key:"シ", img:"h_b0.png", sound:"h_b0.m4a" },
     { name:"1点ド", key:"ド", img:"h_c1.png", sound:"h_c1.m4a" }
   ],
-
-  /* 新Lv.4：旧Lv.5 */
   4: [
     ...trebleCards[1],
     ...trebleCards[2],
@@ -834,26 +686,14 @@ const allCards = {
     ...bassCards[3],
     ...bassCards[4]
   ]
-
 };
-
-
-/* =========================================================
-   全カード用レベル説明
-========================================================= */
 
 const allLevelDescriptions = {
-
   1: "ト音記号：1点ド・1点レ・1点ミ・1点ファ・1点ソ・1点ラ・1点シ・2点ド・2点レ・2点ミ・2点ファ・2点ソ・2点ラ・2点シ・3点ド・3点レ・3点ミ",
-
   2: "ト音記号：ミ・ファ・ソ・ラ・シ・1点ド・1点レ・1点ミ・1点ファ ／ ヘ音記号：1点ファ・1点ミ・1点レ・1点ド・シ・ラ・ソ・ファ・ミ",
-
   3: "ヘ音記号：大文字ラ・大文字シ・ど・れ・み・ふぁ・そ・ら・し・ド・レ・ミ・ファ・ソ・ラ・シ・1点ド",
-
   4: "ト音記号・ヘ音記号 全て"
-
 };
-
 
 /* =========================================================
    状態
@@ -873,13 +713,15 @@ let lastTrainingIndex = -1;
 let trainingChimeTimer = null;
 let nextTrainingTimer = null;
 
+let trainingQuestionCount = 0;
+const TOTAL_QUESTIONS = 10;
+let trainingStartTime = 0;
 
 /* =========================================================
    画面切り替え
 ========================================================= */
 
 function hideAllScreens() {
-
   document
     .querySelectorAll(".screen, .card-screen")
     .forEach(screen => {
@@ -887,24 +729,13 @@ function hideAllScreens() {
     });
 }
 
-
 function showSelectScreen() {
-
   hideAllScreens();
 
-  if (trainingChimeTimer) {
-    clearTimeout(trainingChimeTimer);
-    trainingChimeTimer = null;
-  }
+  if (trainingChimeTimer) clearTimeout(trainingChimeTimer);
+  if (nextTrainingTimer) clearTimeout(nextTrainingTimer);
 
-  if (nextTrainingTimer) {
-    clearTimeout(nextTrainingTimer);
-    nextTrainingTimer = null;
-  }
-
-  document
-    .getElementById("selectScreen")
-    .classList.remove("hidden");
+  document.getElementById("selectScreen").classList.remove("hidden");
 
   selectedClef = null;
   selectedLevel = null;
@@ -912,13 +743,11 @@ function showSelectScreen() {
   trainingLocked = false;
 }
 
-
 /* =========================================================
    はじめに
 ========================================================= */
 
 function startIntroduction() {
-
   selectedClef = "introduction";
   selectedLevel = 0;
   currentIndex = 0;
@@ -927,48 +756,30 @@ function startIntroduction() {
   trainingLocked = false;
   lastTrainingIndex = -1;
 
-  if (trainingChimeTimer) {
-    clearTimeout(trainingChimeTimer);
-    trainingChimeTimer = null;
-  }
-
-  if (nextTrainingTimer) {
-    clearTimeout(nextTrainingTimer);
-    nextTrainingTimer = null;
-  }
+  if (trainingChimeTimer) clearTimeout(trainingChimeTimer);
+  if (nextTrainingTimer) clearTimeout(nextTrainingTimer);
 
   currentCards = introductionCards;
 
   hideAllScreens();
 
-  const cardScreen =
-    document.getElementById("cardScreen");
-
+  const cardScreen = document.getElementById("cardScreen");
   cardScreen.classList.remove("hidden");
   cardScreen.classList.remove("training-mode");
 
-  document
-    .getElementById("levelBadge")
-    .textContent = "🔰";
+  document.getElementById("levelBadge").textContent = "🔰";
 
   showCurrentCard();
 }
 
-
 function selectClef(clef) {
-
   selectedClef = clef;
-
   hideAllScreens();
 
-  const levelScreen =
-    document.getElementById("levelScreen");
-
+  const levelScreen = document.getElementById("levelScreen");
   levelScreen.classList.remove("hidden");
 
-  const title =
-    document.getElementById("levelTitle");
-
+  const title = document.getElementById("levelTitle");
   if (clef === "treble") {
     title.textContent = "ト音記号";
   } else if (clef === "bass") {
@@ -980,112 +791,40 @@ function selectClef(clef) {
   createLevelButtons();
 }
 
-
 function createLevelButtons() {
-
-  const list =
-    document.getElementById("levelList");
-
+  const list = document.getElementById("levelList");
   list.innerHTML = "";
 
-  if (selectedClef === "all") {
-
-    for (let level = 1; level <= 4; level++) {
-
-      const button =
-        document.createElement("button");
-
-      button.className = "level-button";
-
-      const number =
-        document.createElement("span");
-
-      number.className = "level-number";
-      number.textContent = `レベル ${level}`;
-
-      const description =
-        document.createElement("span");
-
-      description.className =
-        "level-description";
-
-      description.textContent =
-        allLevelDescriptions[level];
-
-      button.appendChild(number);
-      button.appendChild(description);
-
-      button.onclick = () => {
-        startLevel(level);
-      };
-
-      list.appendChild(button);
-    }
-
-    return;
-  }
-
+  const isAll = (selectedClef === "all");
+  const descriptions = isAll ? allLevelDescriptions : levelDescriptions[selectedClef];
 
   for (let level = 1; level <= 4; level++) {
-
-    const button =
-      document.createElement("button");
-
+    const button = document.createElement("button");
     button.className = "level-button";
 
-    const number =
-      document.createElement("span");
-
+    const number = document.createElement("span");
     number.className = "level-number";
     number.textContent = `レベル ${level}`;
 
-    const description =
-      document.createElement("span");
-
-    description.className =
-      "level-description";
-
-    if (selectedClef === "treble") {
-
-      description.textContent =
-        levelDescriptions.treble[level];
-
-    } else if (selectedClef === "bass") {
-
-      description.textContent =
-        levelDescriptions.bass[level];
-
-    }
+    const description = document.createElement("span");
+    description.className = "level-description";
+    description.textContent = descriptions[level];
 
     button.appendChild(number);
     button.appendChild(description);
 
-    button.onclick = () => {
-      startLevel(level);
-    };
-
+    button.onclick = () => { startLevel(level); };
     list.appendChild(button);
   }
 }
 
-
 function showLevelScreen() {
-
   hideAllScreens();
 
-  if (trainingChimeTimer) {
-    clearTimeout(trainingChimeTimer);
-    trainingChimeTimer = null;
-  }
+  if (trainingChimeTimer) clearTimeout(trainingChimeTimer);
+  if (nextTrainingTimer) clearTimeout(nextTrainingTimer);
 
-  if (nextTrainingTimer) {
-    clearTimeout(nextTrainingTimer);
-    nextTrainingTimer = null;
-  }
-
-  document
-    .getElementById("levelScreen")
-    .classList.remove("hidden");
+  document.getElementById("levelScreen").classList.remove("hidden");
 
   trainingMode = false;
   trainingLocked = false;
@@ -1093,13 +832,11 @@ function showLevelScreen() {
   createLevelButtons();
 }
 
-
 /* =========================================================
    レベル開始
 ========================================================= */
 
 function startLevel(level) {
-
   selectedLevel = level;
   currentIndex = 0;
 
@@ -1107,186 +844,110 @@ function startLevel(level) {
   trainingLocked = false;
   lastTrainingIndex = -1;
 
-  if (trainingChimeTimer) {
-    clearTimeout(trainingChimeTimer);
-    trainingChimeTimer = null;
-  }
-
-  if (nextTrainingTimer) {
-    clearTimeout(nextTrainingTimer);
-    nextTrainingTimer = null;
-  }
+  if (trainingChimeTimer) clearTimeout(trainingChimeTimer);
+  if (nextTrainingTimer) clearTimeout(nextTrainingTimer);
 
   if (selectedClef === "treble") {
-
-    currentCards =
-      trebleCards[level];
-
+    currentCards = trebleCards[level];
   } else if (selectedClef === "bass") {
-
-    currentCards =
-      bassCards[level];
-
+    currentCards = bassCards[level];
   } else {
-
-    currentCards =
-      allCards[level];
-
+    currentCards = allCards[level];
   }
 
   hideAllScreens();
 
-  const cardScreen =
-    document.getElementById("cardScreen");
-
+  const cardScreen = document.getElementById("cardScreen");
   cardScreen.classList.remove("hidden");
   cardScreen.classList.remove("training-mode");
 
-  document
-    .getElementById("levelBadge")
-    .textContent =
-      `Lv.${level}`;
+  document.getElementById("levelBadge").textContent = `Lv.${level}`;
 
   showCurrentCard();
 }
-
 
 /* =========================================================
    カード表示
 ========================================================= */
 
 function showCurrentCard() {
+  if (!currentCards.length) return;
 
-  if (!currentCards.length) {
-    return;
-  }
-
-  const card =
-    currentCards[currentIndex];
-
-  const image =
-    document.getElementById("noteCardImg");
+  const card = currentCards[currentIndex];
+  const image = document.getElementById("noteCardImg");
 
   image.src = card.img;
   image.alt = card.name;
 
-  document
-    .getElementById("trainingCover")
-    .classList.toggle(
-      "hidden",
-      !trainingMode
-    );
-
-  document
-    .getElementById("correctCircle")
-    .classList.remove("show");
+  document.getElementById("trainingCover").classList.toggle("hidden", !trainingMode);
+  document.getElementById("correctCircle").classList.remove("show");
 }
-
 
 /* =========================================================
    左右移動
 ========================================================= */
 
 function nextCard() {
-
-  if (!currentCards.length || trainingMode) {
-    return;
-  }
-
-  currentIndex =
-    (currentIndex + 1) %
-    currentCards.length;
-
+  if (!currentCards.length || trainingMode) return;
+  currentIndex = (currentIndex + 1) % currentCards.length;
   showCurrentCard();
 }
-
 
 function previousCard() {
-
-  if (!currentCards.length || trainingMode) {
-    return;
-  }
-
-  currentIndex =
-    (currentIndex - 1 +
-      currentCards.length) %
-    currentCards.length;
-
+  if (!currentCards.length || trainingMode) return;
+  currentIndex = (currentIndex - 1 + currentCards.length) % currentCards.length;
   showCurrentCard();
 }
-
 
 /* =========================================================
    トレーニング開始
 ========================================================= */
 
 function startTraining() {
+  if (!currentCards.length) return;
 
-  if (!currentCards.length) {
-    return;
-  }
-
-  if (trainingChimeTimer) {
-    clearTimeout(trainingChimeTimer);
-    trainingChimeTimer = null;
-  }
-
-  if (nextTrainingTimer) {
-    clearTimeout(nextTrainingTimer);
-    nextTrainingTimer = null;
-  }
+  if (trainingChimeTimer) clearTimeout(trainingChimeTimer);
+  if (nextTrainingTimer) clearTimeout(nextTrainingTimer);
 
   trainingMode = true;
   trainingLocked = false;
   lastTrainingIndex = -1;
 
-  const cardScreen =
-    document.getElementById("cardScreen");
+  trainingQuestionCount = 0;
+  trainingStartTime = Date.now();
 
+  hideAllScreens();
+
+  const cardScreen = document.getElementById("cardScreen");
+  cardScreen.classList.remove("hidden");
   cardScreen.classList.add("training-mode");
 
   showRandomTrainingQuestion();
 }
-
 
 /* =========================================================
    ランダム出題
 ========================================================= */
 
 function showRandomTrainingQuestion() {
+  if (!trainingMode || !currentCards.length) return;
 
-  if (!trainingMode || !currentCards.length) {
+  if (trainingQuestionCount >= TOTAL_QUESTIONS) {
+    showResultScreen();
     return;
   }
 
-  if (trainingChimeTimer) {
-    clearTimeout(trainingChimeTimer);
-    trainingChimeTimer = null;
-  }
-
-  if (nextTrainingTimer) {
-    clearTimeout(nextTrainingTimer);
-    nextTrainingTimer = null;
-  }
+  if (trainingChimeTimer) clearTimeout(trainingChimeTimer);
+  if (nextTrainingTimer) clearTimeout(nextTrainingTimer);
 
   let newIndex;
 
   if (currentCards.length === 1) {
-
     newIndex = 0;
-
   } else {
-
     do {
-
-      newIndex =
-        Math.floor(
-          Math.random() *
-          currentCards.length
-        );
-
+      newIndex = Math.floor(Math.random() * currentCards.length);
     } while (newIndex === lastTrainingIndex);
-
   }
 
   lastTrainingIndex = newIndex;
@@ -1294,191 +955,131 @@ function showRandomTrainingQuestion() {
 
   trainingLocked = false;
 
-  const card =
-    currentCards[currentIndex];
-
-  const image =
-    document.getElementById("noteCardImg");
+  const card = currentCards[currentIndex];
+  const image = document.getElementById("noteCardImg");
 
   image.src = card.img;
   image.alt = "";
 
-  document
-    .getElementById("trainingCover")
-    .classList.remove("hidden");
-
-  document
-    .getElementById("correctCircle")
-    .classList.remove("show");
+  document.getElementById("trainingCover").classList.remove("hidden");
+  document.getElementById("correctCircle").classList.remove("show");
 }
 
+/* =========================================================
+   リザルト表示
+========================================================= */
+
+function showResultScreen() {
+  trainingMode = false;
+  const elapsedTime = ((Date.now() - trainingStartTime) / 1000).toFixed(1);
+
+  hideAllScreens();
+
+  document.getElementById("resultScore").textContent = `${TOTAL_QUESTIONS}問クリア！`;
+  document.getElementById("resultTime").textContent = `タイム: ${elapsedTime}秒`;
+
+  document.getElementById("resultScreen").classList.remove("hidden");
+}
 
 /* =========================================================
    鍵盤
 ========================================================= */
 
 function pressKey(key, button) {
+  if (!currentCards.length) return;
 
-  if (!currentCards.length) {
-    return;
-  }
-
-  const card =
-    currentCards[currentIndex];
+  const card = currentCards[currentIndex];
 
   /* -------------------------
      トレーニング
   ------------------------- */
-
   if (trainingMode) {
+    if (trainingLocked) return;
 
-    if (trainingLocked) {
-      return;
-    }
-
-    /* 間違いは完全に無反応 */
-
+    /* 不正解：ボタンを揺らす */
     if (key !== card.key) {
+      button.classList.remove("shake");
+      void button.offsetWidth;
+      button.classList.add("shake");
+      setTimeout(() => button.classList.remove("shake"), 300);
       return;
     }
 
     /* 正解 */
-
     trainingLocked = true;
+    trainingQuestionCount++;
 
-    /*
-      カード音・正解音・赤丸を
-      正解した瞬間に同時スタート
-    */
     playTrainingCorrectSound(card.sound);
-
     showCorrectAnimation();
 
-    /*
-      1.5秒後に次の問題
-    */
     nextTrainingTimer = setTimeout(() => {
-
       if (trainingMode) {
         showRandomTrainingQuestion();
       }
-
     }, 1500);
 
     return;
   }
 
-
   /* -------------------------
      通常モード
   ------------------------- */
-
-  if (key !== card.key) {
-    return;
-  }
+  if (key !== card.key) return;
 
   playSound(card.sound);
   showCat(button);
 }
-
 
 /* =========================================================
    通常モードの音
 ========================================================= */
 
 function playSound(filename) {
-
-  const audio =
-    new Audio(filename);
-
+  const audio = new Audio(filename);
   audio.currentTime = 0;
-
   audio.play().catch(() => {});
 }
 
-
 /* =========================================================
    トレーニング正解音
-
-   カード音・正解音を同時に再生。
 ========================================================= */
 
-const sharedAudio =
-  document.getElementById("sharedAudio");
-
-const correctAudio =
-  document.getElementById("correctAudio");
-
+const sharedAudio = document.getElementById("sharedAudio");
+const correctAudio = document.getElementById("correctAudio");
 
 function playTrainingCorrectSound(cardSound) {
-
-  if (trainingChimeTimer) {
-    clearTimeout(trainingChimeTimer);
-    trainingChimeTimer = null;
-  }
-
-  /* カード音をすぐ再生 */
+  if (trainingChimeTimer) clearTimeout(trainingChimeTimer);
 
   sharedAudio.pause();
-
-  sharedAudio.src =
-    cardSound;
-
+  sharedAudio.src = cardSound;
   sharedAudio.currentTime = 0;
-
-  sharedAudio.onended = null;
-  sharedAudio.onerror = null;
-
-  sharedAudio.play().catch(error => {
-    console.log("カード音再生エラー", error);
-  });
-
-
-  /* 正解音もすぐ再生 */
+  sharedAudio.play().catch(error => console.log("カード音再生エラー", error));
 
   correctAudio.pause();
   correctAudio.currentTime = 0;
-
-  correctAudio.play().catch(error => {
-    console.log("正解音再生エラー", error);
-  });
-
+  correctAudio.play().catch(error => console.log("正解音再生エラー", error));
 }
-
 
 /* =========================================================
    正解アニメーション
 ========================================================= */
 
 function showCorrectAnimation() {
-
-  const circle =
-    document.getElementById("correctCircle");
-
+  const circle = document.getElementById("correctCircle");
   circle.classList.remove("show");
-
   void circle.offsetWidth;
-
   circle.classList.add("show");
 }
-
 
 /* =========================================================
    猫
 ========================================================= */
 
 function showCat(button) {
+  const oldCat = button.querySelector(".cat");
+  if (oldCat) oldCat.remove();
 
-  const oldCat =
-    button.querySelector(".cat");
-
-  if (oldCat) {
-    oldCat.remove();
-  }
-
-  const cat =
-    document.createElement("img");
-
+  const cat = document.createElement("img");
   cat.className = "cat";
   cat.src = "cat.PNG";
   cat.alt = "";
@@ -1486,51 +1087,28 @@ function showCat(button) {
   button.appendChild(cat);
 
   setTimeout(() => {
-
     if (cat.parentNode === button) {
       cat.remove();
     }
-
   }, 900);
 }
-
 
 /* =========================================================
    スワイプ
 ========================================================= */
 
 function touchStart(event) {
-
-  if (!event.changedTouches.length) {
-    return;
-  }
-
-  touchStartX =
-    event.changedTouches[0].clientX;
+  if (!event.changedTouches.length) return;
+  touchStartX = event.changedTouches[0].clientX;
 }
 
-
 function touchEnd(event) {
+  if (!event.changedTouches.length || trainingMode) return;
 
-  if (!event.changedTouches.length) {
-    return;
-  }
+  const endX = event.changedTouches[0].clientX;
+  const diff = endX - touchStartX;
 
-  /* トレーニング中はスワイプしない */
-
-  if (trainingMode) {
-    return;
-  }
-
-  const endX =
-    event.changedTouches[0].clientX;
-
-  const diff =
-    endX - touchStartX;
-
-  if (Math.abs(diff) < 50) {
-    return;
-  }
+  if (Math.abs(diff) < 50) return;
 
   if (diff < 0) {
     nextCard();
@@ -1538,7 +1116,6 @@ function touchEnd(event) {
     previousCard();
   }
 }
-
 
 /* =========================================================
    初期表示
