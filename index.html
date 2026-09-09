@@ -28,10 +28,27 @@
     }
     .hidden { display: none !important; }
     
-    button {
-      font-size: 16px;
+    /* 上部ヘッダー・ナビゲーション */
+    .top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .profile-select {
+      font-size: 14px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid #d8c8b8;
+      background: #fff;
+      color: #5c4b37;
       font-weight: bold;
-      padding: 10px 16px;
+    }
+    
+    button {
+      font-size: 15px;
+      font-weight: bold;
+      padding: 8px 14px;
       border: none;
       border-radius: 8px;
       background-color: #f0e6d2;
@@ -42,6 +59,7 @@
     button:active { transform: scale(0.98); }
     button:disabled { opacity: 0.5; cursor: not-allowed; }
     
+    /* モーダル共通スタイル */
     .modal-bg {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -55,12 +73,13 @@
       padding: 20px;
       width: 90%; max-width: 380px;
       box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+      text-align: left;
     }
-    .modal-title { font-weight: bold; margin-bottom: 12px; color: #5c4b37; }
+    .modal-title { font-weight: bold; font-size: 18px; margin-bottom: 12px; color: #5c4b37; text-align: center; }
     .q-options { display: grid; gap: 8px; margin-bottom: 12px; }
     .q-btn { width: 100%; text-align: left; display: flex; justify-content: space-between; align-items: center; }
     .q-btn.selected { background-color: #8c7355; color: #fff; }
-    .modal-btn { width: 100%; margin-top: 8px; background-color: #8c7355; color: #fff; }
+    .modal-btn { width: 100%; margin-top: 8px; background-color: #8c7355; color: #fff; text-align: center; }
     .modal-btn.cancel { background-color: #e0d0c0; color: #5c4b37; }
 
     /* モード表示バッジ */
@@ -75,32 +94,54 @@
       margin-bottom: 8px;
     }
 
-    /* カード表示エリア */
+    /* ★カード表示エリア（下の文字・図を非表示にして楽譜を拡大する設定）★ */
     .card-display {
-      width: 100%; height: 180px;
+      width: 100%; 
+      height: 220px; 
       border: 2px dashed #d8c8b8;
       border-radius: 12px;
-      display: flex; justify-content: center; align-items: center;
+      display: flex; 
+      justify-content: center; 
+      align-items: flex-start;
       margin: 12px 0;
       background-color: #faf7f2;
+      overflow: hidden; /* 下にはみ出た文字を切る */
     }
-    .card-display img { max-width: 90%; max-height: 90%; object-fit: contain; }
+    .card-display img { 
+      width: 130%; /* 画像を拡大して音符を大きく */
+      height: auto; 
+      object-fit: cover; 
+      margin-top: -10px; /* 位置を中央に微調整 */
+    }
 
-    /* 1. 基本モード：音名ボタン回答UI */
+    /* ★基本モード：ド〜シ（7個）横一列のボタン回答UI★ */
     .button-answers {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
+      grid-template-columns: repeat(7, 1fr); /* 7個を均等配置 */
+      gap: 4px;
       margin-top: 12px;
+      width: 100%;
     }
     .answer-btn {
       padding: 14px 0;
-      font-size: 18px;
-      background-color: #8c7355;
-      color: #fff;
+      font-size: 15px;
+      font-weight: bold;
+      color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
     }
 
-    /* 2. 応用モード：CSS描画のキーボード回答UI */
+    /* 各音名の指定カラー */
+    .btn-do { background-color: #e74c3c; } /* ド：赤 */
+    .btn-re { background-color: #e67e22; } /* レ：オレンジ */
+    .btn-mi { background-color: #f1c40f; color: #4a4a4a; text-shadow: none; } /* ミ：黄色 */
+    .btn-fa { background-color: #2ecc71; } /* ファ：緑 */
+    .btn-so { background-color: #3498db; } /* ソ：水色 */
+    .btn-la { background-color: #1abc9c; } /* ラ：エメラルド */
+    .btn-si { background-color: #e84393; } /* シ：ピンク */
+
+    /* 応用モード：CSS描画のキーボード回答UI */
     .piano-keyboard {
       position: relative;
       display: flex;
@@ -135,59 +176,80 @@
     }
     .black-key:active { background: #444; }
 
-    /* 黒鍵配置 */
-    .bk-cs1 { left: 9.5%; }   /* ド♯/レ♭ */
-    .bk-ds1 { left: 22.0%; }  /* レ♯/ミ♭ */
-    .bk-fs1 { left: 47.0%; }  /* ファ♯/ソ♭ */
-    .bk-gs1 { left: 59.5%; }  /* ソ♯/ラ♭ */
-    .bk-as1 { left: 72.0%; }  /* ラ♯/シ♭ */
+    .bk-cs1 { left: 9.5%; }   
+    .bk-ds1 { left: 22.0%; }  
+    .bk-fs1 { left: 47.0%; }  
+    .bk-gs1 { left: 59.5%; }  
+    .bk-as1 { left: 72.0%; }  
   </style>
 </head>
 <body>
 
 <div class="container">
+  <!-- 上部エリア：「はじめに」ボタンとプロフィール選択を復元 -->
+  <div class="top-nav">
+    <button onclick="openInstructionsModal()">📖 はじめに</button>
+    <select id="profileSelect" class="profile-select" onchange="changeProfile(this.value)">
+      <option value="0">プレイヤー 1</option>
+      <option value="1">プレイヤー 2</option>
+      <option value="2">プレイヤー 3</option>
+    </select>
+  </div>
+
   <h2>Onpu Cards</h2>
   <div id="modeBadge" class="mode-badge">基本モード（ボタン回答）</div>
 
   <div class="card-display">
     <img id="cardImage" src="" alt="おんぷカード" class="hidden">
-    <div id="cardPlaceholder">カード読み込み中...</div>
+    <div id="cardPlaceholder" style="margin-top: 80px;">カード読み込み中...</div>
   </div>
 
   <div style="margin-bottom: 12px;">
     <button onclick="openTrainingSettings()">トレーニング設定</button>
   </div>
 
-  <!-- 【回答UI 1】基本モード用ボタン（初期状態） -->
+  <!-- 【回答UI 1】ド〜シ（7個）の色付き横一列ボタンUI -->
   <div id="buttonAnswerUI" class="button-answers">
-    <button class="answer-btn" onclick="checkButtonAnswer('ド')">ド</button>
-    <button class="answer-btn" onclick="checkButtonAnswer('レ')">レ</button>
-    <button class="answer-btn" onclick="checkButtonAnswer('ミ')">ミ</button>
-    <button class="answer-btn" onclick="checkButtonAnswer('ファ')">ファ</button>
-    <button class="answer-btn" onclick="checkButtonAnswer('ソ')">ソ</button>
-    <button class="answer-btn" onclick="checkButtonAnswer('ラ')">ラ</button>
-    <button class="answer-btn" onclick="checkButtonAnswer('シ')">シ</button>
-    <button class="answer-btn" onclick="checkButtonAnswer('2点ド')">2点ド</button>
+    <button class="answer-btn btn-do" onclick="checkButtonAnswer('ド')">ド</button>
+    <button class="answer-btn btn-re" onclick="checkButtonAnswer('レ')">レ</button>
+    <button class="answer-btn btn-mi" onclick="checkButtonAnswer('ミ')">ミ</button>
+    <button class="answer-btn btn-fa" onclick="checkButtonAnswer('ファ')">ファ</button>
+    <button class="answer-btn btn-so" onclick="checkButtonAnswer('ソ')">ソ</button>
+    <button class="answer-btn btn-la" onclick="checkButtonAnswer('ラ')">ラ</button>
+    <button class="answer-btn btn-si" onclick="checkButtonAnswer('シ')">シ</button>
   </div>
 
-  <!-- 【回答UI 2】全クリア後に開放される鍵盤UI（初期は非表示） -->
+  <!-- 【回答UI 2】鍵盤UI -->
   <div id="keyboardAnswerUI" class="piano-keyboard hidden">
-    <!-- 白鍵 (8本) -->
-    <div class="white-key" onclick="checkPianoKeyAnswer('key_c1')"></div> <!-- 1点ド -->
-    <div class="white-key" onclick="checkPianoKeyAnswer('key_d1')"></div> <!-- 1点レ -->
-    <div class="white-key" onclick="checkPianoKeyAnswer('key_e1')"></div> <!-- 1点ミ -->
-    <div class="white-key" onclick="checkPianoKeyAnswer('key_f1')"></div> <!-- 1点ファ -->
-    <div class="white-key" onclick="checkPianoKeyAnswer('key_g1')"></div> <!-- 1点ソ -->
-    <div class="white-key" onclick="checkPianoKeyAnswer('key_a1')"></div> <!-- 1点ラ -->
-    <div class="white-key" onclick="checkPianoKeyAnswer('key_b1')"></div> <!-- 1点シ -->
-    <div class="white-key" onclick="checkPianoKeyAnswer('key_c2')"></div> <!-- 2点ド -->
+    <div class="white-key" onclick="checkPianoKeyAnswer('key_c1')"></div> 
+    <div class="white-key" onclick="checkPianoKeyAnswer('key_d1')"></div> 
+    <div class="white-key" onclick="checkPianoKeyAnswer('key_e1')"></div> 
+    <div class="white-key" onclick="checkPianoKeyAnswer('key_f1')"></div> 
+    <div class="white-key" onclick="checkPianoKeyAnswer('key_g1')"></div> 
+    <div class="white-key" onclick="checkPianoKeyAnswer('key_a1')"></div> 
+    <div class="white-key" onclick="checkPianoKeyAnswer('key_b1')"></div> 
+    <div class="white-key" onclick="checkPianoKeyAnswer('key_c2')"></div> 
 
-    <!-- 黒鍵 (5本) -->
     <div class="black-key bk-cs1" onclick="checkPianoKeyAnswer('key_cs1')"></div>
     <div class="black-key bk-ds1" onclick="checkPianoKeyAnswer('key_ds1')"></div>
     <div class="black-key bk-fs1" onclick="checkPianoKeyAnswer('key_fs1')"></div>
     <div class="black-key bk-gs1" onclick="checkPianoKeyAnswer('key_gs1')"></div>
     <div class="black-key bk-as1" onclick="checkPianoKeyAnswer('key_as1')"></div>
+  </div>
+</div>
+
+<!-- ★復元：はじめに モーダル★ -->
+<div id="instructionsModal" class="modal-bg hidden">
+  <div class="modal-box">
+    <div class="modal-title">📖 はじめに</div>
+    <div style="font-size: 14px; line-height: 1.6; color: #5c4b37; margin-bottom: 16px;">
+      <p style="margin-top:0;"><strong>【使い方】</strong><br>
+      表示された音符カードを見て、正しい音名のボタンを押してください。</p>
+      <p><strong>【クリア条件と解放】</strong><br>
+      「トレーニング設定」から問題数やタイムアタックに挑戦できます。<br>
+      クリアしていくと、新しい問題数や「変化記号・鍵盤ステージ」が解放されます！</p>
+    </div>
+    <button class="modal-btn" onclick="closeInstructionsModal()">閉じる</button>
   </div>
 </div>
 
@@ -209,7 +271,6 @@
       <button id="t60Btn" class="q-btn" onclick="selectMode('time', 60, this)">60秒 <span id="markT60">🔒</span></button>
     </div>
 
-    <!-- 全レベル達成で解放される応用モードへの切り替えボタン -->
     <div id="masterStageOption" class="hidden" style="margin-top: 14px; padding-top: 10px; border-top: 1px dashed #ccc;">
       <button id="masterModeToggleBtn" class="q-btn" style="background-color: #6b5238; color: #fff;" onclick="toggleMasterKeyboardMode()">
         🎹 変化記号・鍵盤ステージ <span id="markMaster">🔒</span>
@@ -227,7 +288,7 @@
   let targetValue = 10;
   let currentQuestionIndex = 0;
   let correctAnswersCount = 0;
-  let isMasterKeyboardMode = false; // 鍵盤モードフラグ
+  let isMasterKeyboardMode = false;
 
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   function playSynthesizedPokon() {
@@ -245,7 +306,7 @@
     osc.stop(audioCtx.currentTime + 0.08);
   }
 
-  /* 1. 基本の幹音カード（ボタン回答用） */
+  /* 基本モード用カード（ド〜シ） */
   const basicCards = [
     { id: "t_c1", name: "ド", img: "t_c1.png", answer: "ド" },
     { id: "t_d1", name: "レ", img: "t_d1.png", answer: "レ" },
@@ -253,11 +314,10 @@
     { id: "t_f1", name: "ファ", img: "t_f1.png", answer: "ファ" },
     { id: "t_g1", name: "ソ", img: "t_g1.png", answer: "ソ" },
     { id: "t_a1", name: "ラ", img: "t_a1.png", answer: "ラ" },
-    { id: "t_b1", name: "シ", img: "t_b1.png", answer: "シ" },
-    { id: "t_c2", name: "2点ド", img: "t_c2.png", answer: "2点ド" }
+    { id: "t_b1", name: "シ", img: "t_b1.png", answer: "シ" }
   ];
 
-  /* 2. 応用：全変化記号カード（鍵盤回答用・理論音名含む） */
+  /* 応用モード用カード（変化記号） */
   const accidentalCards = [
     { id: "t_cf1", name: "1点ド♭", img: "t_cf1.png", targetKey: "key_b0" }, 
     { id: "t_df1", name: "1点レ♭", img: "t_df1.png", targetKey: "key_cs1" },
@@ -287,7 +347,21 @@
     { id: "t_cn2", name: "2点ド♮", img: "t_cn2.png", targetKey: "key_c2" }
   ];
 
-  /* モーダル表示と全レベルクリア判定 */
+  /* はじめに モーダルの開閉 */
+  function openInstructionsModal() {
+    document.getElementById("instructionsModal").classList.remove("hidden");
+  }
+  function closeInstructionsModal() {
+    document.getElementById("instructionsModal").classList.add("hidden");
+  }
+
+  /* プレイヤー切り替え */
+  function changeProfile(val) {
+    activeProfileIndex = parseInt(val, 10);
+    loadQuestion();
+  }
+
+  /* トレーニング設定モーダル */
   function openTrainingSettings() {
     const q10Cleared = localStorage.getItem(`onpu_clear_q10_${activeProfileIndex}`) === "true";
     const q20Cleared = localStorage.getItem(`onpu_clear_q20_${activeProfileIndex}`) === "true";
@@ -305,7 +379,6 @@
     document.getElementById("t60Btn").disabled = !t30Cleared;
     document.getElementById("markT60").textContent = t60Cleared ? "✨クリア！" : (t30Cleared ? "" : "🔒");
 
-    // 全レベル（60秒まで）クリアで鍵盤モードの選択肢を解放！
     const allCleared = q30Cleared && t60Cleared;
     const masterOpt = document.getElementById("masterStageOption");
     if (allCleared) {
@@ -376,7 +449,6 @@
     };
   }
 
-  /* 基本モード：ボタン判定 */
   function checkButtonAnswer(selectedNote) {
     const currentCard = basicCards[currentQuestionIndex];
     if (selectedNote === currentCard.answer) {
@@ -388,7 +460,6 @@
     }
   }
 
-  /* 応用モード：鍵盤判定 */
   function checkPianoKeyAnswer(pressedKeyId) {
     const currentCard = accidentalCards[currentQuestionIndex];
     if (pressedKeyId === currentCard.targetKey) {
