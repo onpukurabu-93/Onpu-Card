@@ -3,637 +3,143 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>おんぷカード</title>
-
 <style>
-* {
-  box-sizing: border-box;
-}
-
-html,
-body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100%;
-  font-family:
-    -apple-system,
-    BlinkMacSystemFont,
-    "Hiragino Sans",
-    "Yu Gothic",
-    "Meiryo",
-    sans-serif;
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0; width: 100%; height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   background: #fdf8ed;
 }
-
-body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
+body { display: flex; justify-content: center; align-items: center; }
 
 .app-container {
-  width: 100%;
-  max-width: 420px;
-  height: 100dvh;
-  max-height: 100dvh;
-  background: #fdf8ed;
-  border-radius: 24px;
-  overflow: hidden;
-  box-shadow: 0 4px 18px rgba(0,0,0,0.08);
-  position: relative;
+  width: 100%; max-width: 420px; height: 100dvh; max-height: 100dvh;
+  background: #fdf8ed; border-radius: 24px; overflow: hidden;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.08); position: relative;
 }
 
-/* -------------------------
-   共通画面
-------------------------- */
+.screen { width: 100%; height: 100%; padding: 20px; overflow-y: auto; }
+.hidden { display: none !important; }
 
-.screen {
-  width: 100%;
-  height: 100%;
-  padding: 20px;
-  overflow-y: auto;
-}
+/* ヘッダー */
+.header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.back-btn { border: none; background: transparent; color: #5b4636; font-size: 18px; cursor: pointer; }
+.header-title { flex: 1; text-align: center; color: #5b4636; font-size: 24px; font-weight: 700; }
+.header-spacer { width: 60px; }
 
-.hidden {
-  display: none !important;
-}
-
-/* -------------------------
-   ヘッダー
-------------------------- */
-
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 18px;
-}
-
-.back-btn {
-  border: none;
-  background: transparent;
-  color: #5b4636;
-  font-size: 18px;
-  padding: 5px 0;
-  cursor: pointer;
-}
-
-.header-title {
-  flex: 1;
-  text-align: center;
-  color: #5b4636;
-  font-size: 24px;
-  font-weight: 700;
-}
-
-.header-spacer {
-  width: 60px;
-}
-
-/* -------------------------
-   トップ・プロフィール
-------------------------- */
-
-.main-title {
-  text-align: center;
-  color: #5b4636;
-  font-size: 32px;
-  font-weight: 700;
-  margin: 20px 0 10px;
-}
-
-.main-subtitle {
-  text-align: center;
-  color: #806c5a;
-  font-size: 15px;
-  margin-bottom: 15px;
-}
+/* メインメニュー */
+.main-title { text-align: center; color: #5b4636; font-size: 32px; font-weight: 700; margin: 20px 0 10px; }
+.main-subtitle { text-align: center; color: #806c5a; font-size: 15px; margin-bottom: 15px; }
 
 .profile-box {
-  background: white;
-  border-radius: 16px;
-  padding: 14px;
-  margin-bottom: 15px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  text-align: center;
+  background: white; border-radius: 16px; padding: 14px; margin-bottom: 15px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06); text-align: center;
 }
-
-.profile-label {
-  font-size: 13px;
-  color: #806c5a;
-  margin-bottom: 6px;
-}
-
-.profile-current {
-  font-size: 18px;
-  font-weight: 700;
-  color: #5b4636;
-  margin-bottom: 10px;
-}
-
-.profile-select {
-  width: 100%;
-  padding: 8px;
-  border-radius: 10px;
-  border: 1px solid #eadcc8;
-  font-size: 15px;
-  color: #5b4636;
-  background: #fdf8ed;
-  margin-bottom: 8px;
-}
-
-.profile-edit-btn {
-  background: transparent;
-  border: none;
-  color: #b28bb9;
-  font-size: 13px;
-  cursor: pointer;
-  font-weight: 700;
-}
+.profile-label { font-size: 13px; color: #806c5a; margin-bottom: 6px; }
+.profile-current { font-size: 18px; font-weight: 700; color: #5b4636; margin-bottom: 10px; }
+.profile-select { width: 100%; padding: 8px; border-radius: 10px; border: 1px solid #eadcc8; font-size: 15px; color: #5b4636; background: #fdf8ed; margin-bottom: 8px; }
+.profile-edit-btn { background: transparent; border: none; color: #b28bb9; font-size: 13px; cursor: pointer; font-weight: 700; }
 
 .select-button {
-  width: 100%;
-  border: none;
-  border-radius: 18px;
-  padding: 15px 12px;
-  margin-bottom: 10px;
-  background: white;
-  color: #5b4636;
-  font-size: 17px;
-  font-weight: 700;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  cursor: pointer;
+  width: 100%; border: none; border-radius: 18px; padding: 15px 12px; margin-bottom: 10px;
+  background: white; color: #5b4636; font-size: 17px; font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06); cursor: pointer;
 }
+.select-button.accent { background: #78a9c8; color: white; }
 
-.select-button.accent {
-  background: #78a9c8;
-  color: white;
-}
-
-.select-button:active {
-  transform: scale(0.98);
-}
-
-/* -------------------------
-   レベル画面
-------------------------- */
-
-.level-list {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
+/* レベル画面 */
+.level-list { display: flex; flex-direction: column; gap: 14px; }
 .level-button {
-  width: 100%;
-  text-align: left;
-  border: none;
-  border-radius: 18px;
-  background: white;
-  padding: 18px 18px;
-  color: #5b4636;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  cursor: pointer;
-  position: relative;
+  width: 100%; text-align: left; border: none; border-radius: 18px; background: white;
+  padding: 18px; color: #5b4636; box-shadow: 0 2px 8px rgba(0,0,0,0.06); cursor: pointer; position: relative;
+}
+.level-number { display: block; font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+.level-description { display: block; font-size: 14px; line-height: 1.7; color: #806c5a; }
+.locked-badge { position: absolute; top: 18px; right: 18px; background: #e99595; color: white; padding: 4px 10px; border-radius: 10px; font-size: 12px; font-weight: 700; }
+
+/* レベル表紙画面 (Level_start.png) */
+.cover-screen {
+  position: relative; width: 100%; height: 100%;
+  background: url('Level_start.png') no-repeat center center / cover;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer;
+}
+.cover-level-number {
+  position: absolute; top: 28%; font-size: 72px; font-weight: 900; color: #5b4636;
+  text-shadow: 2px 2px 0px #fff, -2px -2px 0px #fff, 2px -2px 0px #fff, -2px 2px 0px #fff;
 }
 
-.level-number {
-  display: block;
-  font-size: 20px;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-
-.level-description {
-  display: block;
-  font-size: 14px;
-  line-height: 1.7;
-  color: #806c5a;
-  white-space: normal;
-}
-
-.locked-badge {
-  position: absolute;
-  top: 18px;
-  right: 18px;
-  background: #e99595;
-  color: white;
-  padding: 4px 10px;
-  border-radius: 10px;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-/* -------------------------
-   カード画面
-------------------------- */
-
-.card-screen {
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  min-height: 0;
-  overflow: hidden;
-}
-
-.card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 4px 4px 10px;
-  flex-shrink: 0;
-  gap: 8px;
-}
-
-.card-back {
-  border: none;
-  background: transparent;
-  color: #5b4636;
-  font-size: 17px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.card-title {
-  flex: 1;
-  text-align: center;
-  color: #5b4636;
-  font-size: 20px;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.level-badge {
-  background: #eadcc8;
-  color: #5b4636;
-  border-radius: 20px;
-  padding: 5px 10px;
-  font-size: 13px;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.training-btn {
-  border: none;
-  background: #eadcc8;
-  color: #5b4636;
-  border-radius: 20px;
-  padding: 7px 11px;
-  font-size: 13px;
-  font-weight: 700;
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-.training-btn:active {
-  transform: scale(0.96);
-}
+/* カード画面 */
+.card-screen { padding: 12px; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+.card-header { display: flex; align-items: center; justify-content: space-between; padding: 4px 4px 10px; gap: 8px; }
+.card-back { border: none; background: transparent; color: #5b4636; font-size: 17px; cursor: pointer; }
+.card-title { flex: 1; text-align: center; color: #5b4636; font-size: 20px; font-weight: 700; }
+.level-badge { background: #eadcc8; color: #5b4636; border-radius: 20px; padding: 5px 10px; font-size: 13px; font-weight: 700; }
+.training-btn { border: none; background: #eadcc8; color: #5b4636; border-radius: 20px; padding: 7px 11px; font-size: 13px; font-weight: 700; cursor: pointer; }
 
 .card-area {
-  flex: 1;
-  min-height: 0;
-  background: white;
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
+  flex: 1; background: white; border-radius: 20px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;
 }
+.note-card-wrap { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+.note-card-img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.training-cover { position: absolute; width: 100%; height: 36%; left: 0; bottom: 0; background: white; transition: opacity 0.3s; }
+.training-cover.reveal { opacity: 0; }
 
-.note-card-wrap {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 0;
-}
-
-.note-card-img {
-  display: block;
-  max-width: 100%;
-  max-height: 100%;
-  width: auto;
-  height: auto;
-  object-fit: contain;
-  user-select: none;
-  -webkit-user-drag: none;
-  pointer-events: none;
-}
-
-.training-cover {
-  position: absolute;
-  width: 100%;
-  height: 36%;
-  left: 0;
-  bottom: 0;
-  background: white;
-  z-index: 6;
-  pointer-events: none;
-  transition: opacity 0.3s;
-}
-
-.training-cover.reveal {
-  opacity: 0;
-}
+.timer-display { position: absolute; top: 15px; left: 15px; background: #e99595; color: white; padding: 6px 14px; border-radius: 20px; font-size: 16px; font-weight: 700; }
+.combo-popup { position: absolute; top: 15px; right: 15px; background: #e6b26a; color: white; padding: 6px 14px; border-radius: 20px; font-size: 16px; font-weight: 700; }
 
 .correct-circle {
-  position: absolute;
-  width: 160px;
-  height: 160px;
-  border: 8px solid #f04444;
-  border-radius: 50%;
-  left: 50%;
-  top: 34%;
-  transform: translate(-50%, -50%) scale(0.2);
-  opacity: 0;
-  z-index: 10;
-  pointer-events: none;
+  position: absolute; width: 160px; height: 160px; border: 8px solid #f04444; border-radius: 50%;
+  left: 50%; top: 34%; transform: translate(-50%, -50%) scale(0.2); opacity: 0; pointer-events: none;
 }
-
-.correct-circle.show {
-  animation: correctCircle 0.8s ease-out forwards;
-}
-
+.correct-circle.show { animation: correctCircle 0.8s ease-out forwards; }
 @keyframes correctCircle {
   0% { transform: translate(-50%, -50%) scale(0.2); opacity: 0; }
-  45% { transform: translate(-50%, -50%) scale(1.12); opacity: 1; }
-  70% { transform: translate(-50%, -50%) scale(0.96); opacity: 1; }
+  50% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
   100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 }
 
-.combo-popup {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  background: #e6b26a;
-  color: white;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 16px;
-  font-weight: 700;
-  z-index: 15;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-  animation: popIn 0.3s ease-out;
-}
+.arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 42px; height: 42px; border: none; border-radius: 50%; background: rgba(253,248,237,0.95); font-size: 28px; cursor: pointer; }
+.arrow-left { left: 8px; } .arrow-right { right: 8px; }
 
-@keyframes popIn {
-  0% { transform: scale(0.5); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
-}
+/* 鍵盤 */
+.keyboard { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; padding-top: 10px; }
+.key-btn { border: none; border-radius: 12px; min-height: 54px; color: white; font-size: 16px; font-weight: 700; cursor: pointer; position: relative; }
+.key-do { background: #e99595; } .key-re { background: #e6b26a; } .key-mi { background: #d6c45d; }
+.key-fa { background: #8dbb8d; } .key-so { background: #78a9c8; } .key-la { background: #9292c7; } .key-si { background: #b28bb9; }
 
-.arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 42px;
-  height: 42px;
-  border: none;
-  border-radius: 50%;
-  background: rgba(253,248,237,0.95);
-  color: #5b4636;
-  font-size: 28px;
-  line-height: 42px;
-  padding: 0;
-  z-index: 5;
-  cursor: pointer;
-  box-shadow: 0 2px 7px rgba(0,0,0,0.08);
-}
+/* モーダル */
+.modal-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: flex; justify-content: center; align-items: center; z-index: 100; }
+.modal-box { background: white; padding: 24px; border-radius: 20px; width: 85%; max-width: 340px; text-align: center; }
+.modal-title { font-size: 20px; font-weight: 700; color: #5b4636; margin-bottom: 15px; }
+.modal-input { width: 100%; padding: 12px; font-size: 16px; border: 2px solid #eadcc8; border-radius: 12px; margin-bottom: 12px; text-align: center; }
+.modal-btn { background: #78a9c8; color: white; border: none; border-radius: 12px; padding: 12px; font-size: 16px; font-weight: 700; width: 100%; cursor: pointer; margin-top: 6px; }
+.modal-btn.cancel { background: #ccc; }
 
-.arrow-left { left: 8px; }
-.arrow-right { right: 8px; }
+.q-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+.q-btn { padding: 10px 0; border: 2px solid #eadcc8; background: #fdf8ed; border-radius: 10px; font-size: 14px; font-weight: 700; color: #5b4636; cursor: pointer; }
+.q-btn.selected { background: #78a9c8; color: white; border-color: #78a9c8; }
+.q-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-/* -------------------------
-   鍵盤
-------------------------- */
+/* リザルト */
+.result-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; position: relative; }
+.result-title { font-size: 28px; font-weight: 700; color: #5b4636; margin-bottom: 16px; }
+.result-detail { font-size: 18px; color: #806c5a; margin-bottom: 8px; }
+.result-best { font-size: 16px; color: #e99595; font-weight: 700; margin-bottom: 24px; }
 
-.keyboard {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 5px;
-  padding-top: 10px;
-  flex-shrink: 0;
-}
+/* スコア画面 */
+.score-card { background: white; border-radius: 16px; padding: 16px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.score-card-title { font-size: 16px; font-weight: 700; color: #5b4636; margin-bottom: 10px; border-bottom: 2px solid #fdf8ed; padding-bottom: 6px; }
+.score-row { display: flex; justify-content: space-between; font-size: 14px; color: #806c5a; margin-bottom: 6px; }
 
-.key-btn {
-  position: relative;
-  border: none;
-  border-radius: 12px;
-  min-height: 54px;
-  color: white;
-  font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-}
-
-.key-btn:active {
-  transform: scale(0.96);
-}
-
-.key-btn.shake {
-  animation: keyShake 0.3s ease-in-out;
-}
-
-@keyframes keyShake {
-  0%, 100% { transform: translateX(0); }
-  20%, 60% { transform: translateX(-6px); }
-  40%, 80% { transform: translateX(6px); }
-}
-
-.key-do { background: #e99595; }
-.key-re { background: #e6b26a; }
-.key-mi { background: #d6c45d; }
-.key-fa { background: #8dbb8d; }
-.key-so { background: #78a9c8; }
-.key-la { background: #9292c7; }
-.key-si { background: #b28bb9; }
-
-.cat {
-  position: absolute;
-  width: 45px;
-  height: 45px;
-  object-fit: contain;
-  left: 50%;
-  transform: translateX(-50%);
-  top: -48px;
-  pointer-events: none;
-  z-index: 20;
-}
-
-.card-screen.training-mode .arrow { display: none; }
-.card-screen.training-mode .training-btn { background: #d8c4a8; }
-
-/* -------------------------
-   モーダル・画面各種
-------------------------- */
-
-.modal-bg {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.4);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 100;
-}
-
-.modal-box {
-  background: white;
-  padding: 24px;
-  border-radius: 20px;
-  width: 85%;
-  max-width: 340px;
-  text-align: center;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-}
-
-.modal-title {
-  font-size: 20px;
-  font-weight: 700;
-  color: #5b4636;
-  margin-bottom: 15px;
-}
-
-.modal-input {
-  width: 100%;
-  padding: 12px;
-  font-size: 16px;
-  border: 2px solid #eadcc8;
-  border-radius: 12px;
-  margin-bottom: 15px;
-  text-align: center;
-  color: #5b4636;
-  outline: none;
-}
-
-.modal-btn {
-  background: #78a9c8;
-  color: white;
-  border: none;
-  border-radius: 12px;
-  padding: 12px;
-  font-size: 16px;
-  font-weight: 700;
-  width: 100%;
-  cursor: pointer;
-}
-
-.question-count-options {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
-}
-
-.q-btn {
-  flex: 1;
-  padding: 12px 0;
-  border: 2px solid #eadcc8;
-  background: #fdf8ed;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 700;
-  color: #5b4636;
-  cursor: pointer;
-}
-
-.q-btn.selected {
-  background: #78a9c8;
-  color: white;
-  border-color: #78a9c8;
-}
-
-.result-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  text-align: center;
-  position: relative;
-}
-
-.result-title {
-  font-size: 28px;
-  font-weight: 700;
-  color: #5b4636;
-  margin-bottom: 16px;
-}
-
-.result-detail {
-  font-size: 18px;
-  color: #806c5a;
-  margin-bottom: 8px;
-}
-
-.result-best {
-  font-size: 16px;
-  color: #e99595;
-  font-weight: 700;
-  margin-bottom: 24px;
-}
-
-/* -------------------------
-   成績確認画面
-------------------------- */
-
-.score-card {
-  background: white;
-  border-radius: 16px;
-  padding: 16px;
-  margin-bottom: 15px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-}
-
-.score-card-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: #5b4636;
-  margin-bottom: 10px;
-  border-bottom: 2px solid #fdf8ed;
-  padding-bottom: 6px;
-}
-
-.score-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 14px;
-  color: #806c5a;
-  margin-bottom: 6px;
-}
-
-.score-row strong {
-  color: #5b4636;
-}
-
-/* -------------------------
-   紙吹雪（クラッカー）演出
-------------------------- */
-
-#confettiCanvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 50;
-}
+#confettiCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; }
 </style>
 </head>
-
 <body>
 
 <audio id="sharedAudio" preload="auto"></audio>
 <audio id="correctAudio" preload="auto" src="seikai.mp3"></audio>
+<audio id="fanfareAudio" preload="auto" src="Tassei-fanfare.mp3"></audio>
 
 <div class="app-container">
 
@@ -642,14 +148,13 @@ body {
     <div class="main-title">おんぷカード</div>
     <div class="main-subtitle">音符を見て、読んでみよう</div>
 
-    <!-- プレイヤー切り替えボックス -->
     <div class="profile-box">
       <div class="profile-label">プレイ中のプレイヤー（教室ネーム）</div>
       <div class="profile-current" id="currentProfileName">未設定</div>
       <select id="profileSelect" class="profile-select" onchange="switchProfile(this.value)">
         <option value="">-- プレイヤーを選択 --</option>
       </select>
-      <button class="profile-edit-btn" onclick="openProfileModal()">✏️ 教室ネームを登録・変更する</button>
+      <button class="profile-edit-btn" onclick="openAdminModal()">🔒 教室ネームの登録・変更（先生）</button>
     </div>
 
     <button class="select-button accent" onclick="showScoreScreen()">🏆 せいせき・ランキングをみる</button>
@@ -669,6 +174,11 @@ body {
     <div id="levelList" class="level-list"></div>
   </section>
 
+  <!-- レベル表紙画面 (Level_start.png) -->
+  <section id="coverScreen" class="cover-screen hidden" onclick="proceedToCards()">
+    <div id="coverLevelNumber" class="cover-level-number">1</div>
+  </section>
+
   <!-- 成績確認画面 -->
   <section id="scoreScreen" class="screen hidden">
     <div class="header">
@@ -676,7 +186,6 @@ body {
       <div class="header-title">せいせき</div>
       <div class="header-spacer"></div>
     </div>
-
     <div id="scoreContent"></div>
   </section>
 
@@ -689,9 +198,10 @@ body {
       <button id="trainingButton" class="training-btn" onclick="openTrainingSettings()">トレーニング</button>
     </div>
 
-    <div id="cardArea" class="card-area" ontouchstart="touchStart(event)" ontouchend="touchEnd(event)">
+    <div id="cardArea" class="card-area">
+      <div id="timerDisplay" class="timer-display hidden">⏱️ 30s</div>
       <div id="comboPopup" class="combo-popup hidden">🔥 2コンボ！</div>
-      <button class="arrow arrow-left" onclick="previousCard()" aria-label="前のカード">‹</button>
+      <button class="arrow arrow-left" onclick="previousCard()">‹</button>
 
       <div class="note-card-wrap">
         <img id="noteCardImg" class="note-card-img" src="" alt="音符カード">
@@ -699,8 +209,7 @@ body {
       </div>
 
       <div id="correctCircle" class="correct-circle"></div>
-
-      <button class="arrow arrow-right" onclick="nextCard()" aria-label="次のカード">›</button>
+      <button class="arrow arrow-right" onclick="nextCard()">›</button>
     </div>
 
     <div class="keyboard">
@@ -722,6 +231,7 @@ body {
       <div class="result-detail" id="resultScore">正答率: 100%</div>
       <div class="result-detail" id="resultTime">タイム: 0.0秒</div>
       <div class="result-best" id="resultBest">✨ 過去最高記録更新！</div>
+      <button id="nextLevelBtn" class="select-button accent hidden" onclick="goToNextLevel()">🚀 次のレベルへ挑戦する！</button>
       <button class="select-button" onclick="startTrainingWithConfig()">もう一度挑戦する</button>
       <button class="select-button" onclick="showSelectScreen()">トップへ戻る</button>
     </div>
@@ -729,17 +239,25 @@ body {
 
 </div>
 
-<!-- 教室ネーム登録モーダル -->
-<div id="profileModal" class="modal-bg hidden">
+<!-- 管理者認証＆プレイヤー登録モーダル -->
+<div id="adminModal" class="modal-bg hidden">
   <div class="modal-box">
-    <div class="modal-title">プレイヤー登録（最大3人）</div>
-    <select id="slotSelect" class="modal-input">
-      <option value="0">プレイヤー 1</option>
-      <option value="1">プレイヤー 2</option>
-      <option value="2">プレイヤー 3</option>
-    </select>
-    <input type="text" id="profileInputName" class="modal-input" placeholder="例: ピアノねこ">
-    <button class="modal-btn" onclick="saveProfile()">登録する</button>
+    <div class="modal-title">管理者（先生）設定</div>
+    <div id="adminAuthSection">
+      <input type="password" id="adminPassInput" class="modal-input" placeholder="パスワード (1234)">
+      <button class="modal-btn" onclick="verifyAdminPass()">認証</button>
+      <button class="modal-btn cancel" onclick="closeAdminModal()">キャンセル</button>
+    </div>
+    <div id="adminEditSection" class="hidden">
+      <select id="slotSelect" class="modal-input">
+        <option value="0">プレイヤー 1</option>
+        <option value="1">プレイヤー 2</option>
+        <option value="2">プレイヤー 3</option>
+      </select>
+      <input type="text" id="profileInputName" class="modal-input" placeholder="例: ピアノねこ">
+      <button class="modal-btn" onclick="saveProfile()">保存する</button>
+      <button class="modal-btn cancel" onclick="closeAdminModal()">閉じる</button>
+    </div>
   </div>
 </div>
 
@@ -747,211 +265,61 @@ body {
 <div id="trainingModal" class="modal-bg hidden">
   <div class="modal-box">
     <div class="modal-title">トレーニング設定</div>
-    <div style="font-size: 14px; color: #806c5a; margin-bottom: 8px; text-align: left;">もんだい数</div>
-    <div class="question-count-options">
-      <button class="q-btn selected" onclick="selectQuestionCount(10, this)">10問</button>
-      <button class="q-btn" onclick="selectQuestionCount(20, this)">20問</button>
-      <button class="q-btn" onclick="selectQuestionCount(30, this)">30問</button>
+    <div style="font-size: 13px; color: #806c5a; margin-bottom: 6px; text-align: left;">問題数指定</div>
+    <div class="q-options">
+      <button id="q10Btn" class="q-btn selected" onclick="selectMode('count', 10, this)">10問</button>
+      <button id="q20Btn" class="q-btn" onclick="selectMode('count', 20, this)">20問</button>
+      <button id="q30Btn" class="q-btn" onclick="selectMode('count', 30, this)">30問</button>
+    </div>
+    <div style="font-size: 13px; color: #806c5a; margin-bottom: 6px; text-align: left;">時間制限（タイムアタック）</div>
+    <div class="q-options">
+      <button id="t30Btn" class="q-btn" onclick="selectMode('time', 30, this)">30秒</button>
+      <button id="t60Btn" class="q-btn" onclick="selectMode('time', 60, this)">60秒</button>
     </div>
     <button class="modal-btn" onclick="startTrainingConfirmed()">スタート！</button>
+    <button class="modal-btn cancel" onclick="closeTrainingModal()">やっぱりやめる</button>
   </div>
 </div>
 
 <script>
-/* =========================================================
-   データ定義
-========================================================= */
-
+/* カード定義 */
 const trebleCards = {
-  1: [
-    { id:"t_c1", name:"1点ド", key:"ド", img:"t_c1.png", sound:"t_c1.m4a" },
-    { id:"t_d1", name:"1点レ", key:"レ", img:"t_d1.png", sound:"t_d1.m4a" },
-    { id:"t_e1", name:"1点ミ", key:"ミ", img:"t_e1.png", sound:"t_e1.m4a" },
-    { id:"t_f1", name:"1点ファ", key:"ファ", img:"t_f1.png", sound:"t_f1.m4a" },
-    { id:"t_g1", name:"1点ソ", key:"ソ", img:"t_g1.png", sound:"t_g1.m4a" },
-    { id:"t_a1", name:"1点ラ", key:"ラ", img:"t_a1.png", sound:"t_a1.m4a" },
-    { id:"t_b1", name:"1点シ", key:"シ", img:"t_b1.png", sound:"t_b1.m4a" },
-    { id:"t_c2", name:"2点ド", key:"ド", img:"t_c2.png", sound:"t_c2.m4a" }
-  ],
-  2: [
-    { id:"t_c2", name:"2点ド", key:"ド", img:"t_c2.png", sound:"t_c2.m4a" },
-    { id:"t_d2", name:"2点レ", key:"レ", img:"t_d2.png", sound:"t_d2.m4a" },
-    { id:"t_e2", name:"2点ミ", key:"ミ", img:"t_e2.png", sound:"t_e2.m4a" },
-    { id:"t_f2", name:"2点ファ", key:"ファ", img:"t_f2.png", sound:"t_f2.m4a" },
-    { id:"t_g2", name:"2点ソ", key:"ソ", img:"t_g2.png", sound:"t_g2.m4a" },
-    { id:"t_a2", name:"2点ラ", key:"ラ", img:"t_a2.png", sound:"t_a2.m4a" },
-    { id:"t_b2", name:"2点シ", key:"シ", img:"t_b2.png", sound:"t_b2.m4a" },
-    { id:"t_c3", name:"3点ド", key:"ド", img:"t_c3.png", sound:"t_c3.m4a" }
-  ],
-  3: [
-    { id:"t_c3", name:"3点ド", key:"ド", img:"t_c3.png", sound:"t_c3.m4a" },
-    { id:"t_d3", name:"3点レ", key:"レ", img:"t_d3.png", sound:"t_d3.m4a" },
-    { id:"t_e3", name:"3点ミ", key:"ミ", img:"t_e3.png", sound:"t_e3.m4a" }
-  ],
-  4: [
-    { id:"t_e", name:"ミ", key:"ミ", img:"t_e.png", sound:"t_e.m4a" },
-    { id:"t_f", name:"ファ", key:"ファ", img:"t_f.png", sound:"t_f.m4a" },
-    { id:"t_g", name:"ソ", key:"ソ", img:"t_g.png", sound:"t_g.m4a" },
-    { id:"t_a", name:"ラ", key:"ラ", img:"t_a.png", sound:"t_a.m4a" },
-    { id:"t_b", name:"シ", key:"シ", img:"t_b.png", sound:"t_b.m4a" },
-    { id:"t_c1", name:"1点ド", key:"ド", img:"t_c1.png", sound:"t_c1.m4a" },
-    { id:"t_d1", name:"1点レ", key:"レ", img:"t_d1.png", sound:"t_d1.m4a" },
-    { id:"t_e1", name:"1点ミ", key:"ミ", img:"t_e1.png", sound:"t_e1.m4a" },
-    { id:"t_f1", name:"1点ファ", key:"ファ", img:"t_f1.png", sound:"t_f1.m4a" }
-  ]
+  1: [ { id:"t_c1", name:"1点ド", key:"ド", img:"t_c1.png", sound:"t_c1.m4a" }, { id:"t_d1", name:"1点レ", key:"レ", img:"t_d1.png", sound:"t_d1.m4a" }, { id:"t_e1", name:"1点ミ", key:"ミ", img:"t_e1.png", sound:"t_e1.m4a" }, { id:"t_f1", name:"1点ファ", key:"ファ", img:"t_f1.png", sound:"t_f1.m4a" }, { id:"t_g1", name:"1点ソ", key:"ソ", img:"t_g1.png", sound:"t_g1.m4a" }, { id:"t_a1", name:"1点ラ", key:"ラ", img:"t_a1.png", sound:"t_a1.m4a" }, { id:"t_b1", name:"1点シ", key:"シ", img:"t_b1.png", sound:"t_b1.m4a" }, { id:"t_c2", name:"2点ド", key:"ド", img:"t_c2.png", sound:"t_c2.m4a" } ],
+  2: [ { id:"t_c2", name:"2点ド", key:"ド", img:"t_c2.png", sound:"t_c2.m4a" }, { id:"t_d2", name:"2点レ", key:"レ", img:"t_d2.png", sound:"t_d2.m4a" }, { id:"t_e2", name:"2点ミ", key:"ミ", img:"t_e2.png", sound:"t_e2.m4a" }, { id:"t_f2", name:"2点ファ", key:"ファ", img:"t_f2.png", sound:"t_f2.m4a" }, { id:"t_g2", name:"2点ソ", key:"ソ", img:"t_g2.png", sound:"t_g2.m4a" }, { id:"t_a2", name:"2点ラ", key:"ラ", img:"t_a2.png", sound:"t_a2.m4a" }, { id:"t_b2", name:"2点シ", key:"シ", img:"t_b2.png", sound:"t_b2.m4a" }, { id:"t_c3", name:"3点ド", key:"ド", img:"t_c3.png", sound:"t_c3.m4a" } ],
+  3: [ { id:"t_c3", name:"3点ド", key:"ド", img:"t_c3.png", sound:"t_c3.m4a" }, { id:"t_d3", name:"3点レ", key:"レ", img:"t_d3.png", sound:"t_d3.m4a" }, { id:"t_e3", name:"3点ミ", key:"ミ", img:"t_e3.png", sound:"t_e3.m4a" } ],
+  4: [ { id:"t_e", name:"ミ", key:"ミ", img:"t_e.png", sound:"t_e.m4a" }, { id:"t_f", name:"ファ", key:"ファ", img:"t_f.png", sound:"t_f.m4a" }, { id:"t_g", name:"ソ", key:"ソ", img:"t_g.png", sound:"t_g.m4a" }, { id:"t_a", name:"ラ", key:"ラ", img:"t_a.png", sound:"t_a.m4a" }, { id:"t_b", name:"シ", key:"シ", img:"t_b.png", sound:"t_b.m4a" }, { id:"t_c1", name:"1点ド", key:"ド", img:"t_c1.png", sound:"t_c1.m4a" }, { id:"t_d1", name:"1点レ", key:"レ", img:"t_d1.png", sound:"t_d1.m4a" }, { id:"t_e1", name:"1点ミ", key:"ミ", img:"t_e1.png", sound:"t_e1.m4a" }, { id:"t_f1", name:"1点ファ", key:"ファ", img:"t_f1.png", sound:"t_f1.m4a" } ]
 };
-
 const bassCards = {
-  1: [
-    { id:"h_c1", name:"1点ド", key:"ド", img:"h_c1.png", sound:"h_c1.m4a" },
-    { id:"h_b0", name:"シ", key:"シ", img:"h_b0.png", sound:"h_b0.m4a" },
-    { id:"h_a0", name:"ラ", key:"ラ", img:"h_a0.png", sound:"h_a0.m4a" },
-    { id:"h_g", name:"ソ", key:"ソ", img:"h_g.png", sound:"h_g.m4a" },
-    { id:"h_f", name:"ファ", key:"ファ", img:"h_f.png", sound:"h_f.m4a" },
-    { id:"h_e", name:"ミ", key:"ミ", img:"h_e.png", sound:"h_e.m4a" },
-    { id:"h_d", name:"レ", key:"レ", img:"h_d.png", sound:"h_d.m4a" },
-    { id:"h_c00", name:"ド", key:"ド", img:"h_c00.png", sound:"h_c00.m4a" }
-  ],
-  2: [
-    { id:"h_c00", name:"ド", key:"ド", img:"h_c00.png", sound:"h_c00.m4a" },
-    { id:"h_bsi", name:"し", key:"シ", img:"h_bsi.png", sound:"h_bsi.m4a" },
-    { id:"h_ara", name:"ら", key:"ラ", img:"h_ara.png", sound:"h_ara.m4a" },
-    { id:"h_gso", name:"そ", key:"ソ", img:"h_gso.png", sound:"h_gso.m4a" },
-    { id:"h_ffa", name:"ふぁ", key:"ファ", img:"h_ffa.png", sound:"h_ffa.m4a" },
-    { id:"h_emi", name:"み", key:"ミ", img:"h_emi.png", sound:"h_emi.m4a" },
-    { id:"h_dre", name:"れ", key:"レ", img:"h_dre.png", sound:"h_dre.m4a" },
-    { id:"h_cdo", name:"ど", key:"ド", img:"h_cdo.png", sound:"h_cdo.m4a" }
-  ],
-  3: [
-    { id:"h_cdo", name:"ど", key:"ド", img:"h_cdo.png", sound:"h_cdo.m4a" },
-    { id:"h_bSi1", name:"大文字シ", key:"シ", img:"h_bSi1.png", sound:"h_bSi1.m4a" },
-    { id:"h_aRa1", name:"大文字ラ", key:"ラ", img:"h_aRa1.png", sound:"h_aRa1.m4a" }
-  ],
-  4: [
-    { id:"h_f1", name:"1点ファ", key:"ファ", img:"h_f1.png", sound:"h_f1.m4a" },
-    { id:"h_e1", name:"1点ミ", key:"ミ", img:"h_e1.png", sound:"h_e1.m4a" },
-    { id:"h_d1", name:"1点レ", key:"レ", img:"h_d1.png", sound:"h_d1.m4a" },
-    { id:"h_c1", name:"1点ド", key:"ド", img:"h_c1.png", sound:"h_c1.m4a" },
-    { id:"h_b0", name:"シ", key:"シ", img:"h_b0.png", sound:"h_b0.m4a" },
-    { id:"h_a0", name:"ラ", key:"ラ", img:"h_a0.png", sound:"h_a0.m4a" },
-    { id:"h_g", name:"ソ", key:"ソ", img:"h_g.png", sound:"h_g.m4a" },
-    { id:"h_f", name:"ファ", key:"ファ", img:"h_f.png", sound:"h_f.m4a" },
-    { id:"h_e", name:"ミ", key:"ミ", img:"h_e.png", sound:"h_e.m4a" }
-  ]
+  1: [ { id:"h_c1", name:"1点ド", key:"ド", img:"h_c1.png", sound:"h_c1.m4a" }, { id:"h_b0", name:"シ", key:"シ", img:"h_b0.png", sound:"h_b0.m4a" }, { id:"h_a0", name:"ラ", key:"ラ", img:"h_a0.png", sound:"h_a0.m4a" }, { id:"h_g", name:"ソ", key:"ソ", img:"h_g.png", sound:"h_g.m4a" }, { id:"h_f", name:"ファ", key:"ファ", img:"h_f.png", sound:"h_f.m4a" }, { id:"h_e", name:"ミ", key:"ミ", img:"h_e.png", sound:"h_e.m4a" }, { id:"h_d", name:"レ", key:"レ", img:"h_d.png", sound:"h_d.m4a" }, { id:"h_c00", name:"ド", key:"ド", img:"h_c00.png", sound:"h_c00.m4a" } ],
+  2: [ { id:"h_c00", name:"ド", key:"ド", img:"h_c00.png", sound:"h_c00.m4a" }, { id:"h_bsi", name:"し", key:"シ", img:"h_bsi.png", sound:"h_bsi.m4a" }, { id:"h_ara", name:"ら", key:"ラ", img:"h_ara.png", sound:"h_ara.m4a" }, { id:"h_gso", name:"そ", key:"ソ", img:"h_gso.png", sound:"h_gso.m4a" }, { id:"h_ffa", name:"ふぁ", key:"ファ", img:"h_ffa.png", sound:"h_ffa.m4a" }, { id:"h_emi", name:"み", key:"ミ", img:"h_emi.png", sound:"h_emi.m4a" }, { id:"h_dre", name:"れ", key:"レ", img:"h_dre.png", sound:"h_dre.m4a" }, { id:"h_cdo", name:"ど", key:"ド", img:"h_cdo.png", sound:"h_cdo.m4a" } ],
+  3: [ { id:"h_cdo", name:"ど", key:"ド", img:"h_cdo.png", sound:"h_cdo.m4a" }, { id:"h_bSi1", name:"大文字シ", key:"シ", img:"h_bSi1.png", sound:"h_bSi1.m4a" }, { id:"h_aRa1", name:"大文字ラ", key:"ラ", img:"h_aRa1.png", sound:"h_aRa1.m4a" } ],
+  4: [ { id:"h_f1", name:"1点ファ", key:"ファ", img:"h_f1.png", sound:"h_f1.m4a" }, { id:"h_e1", name:"1点ミ", key:"ミ", img:"h_e1.png", sound:"h_e1.m4a" }, { id:"h_d1", name:"1点レ", key:"レ", img:"h_d1.png", sound:"h_d1.m4a" }, { id:"h_c1", name:"1点ド", key:"ド", img:"h_c1.png", sound:"h_c1.m4a" }, { id:"h_b0", name:"シ", key:"シ", img:"h_b0.png", sound:"h_b0.m4a" }, { id:"h_a0", name:"ラ", key:"ラ", img:"h_a0.png", sound:"h_a0.m4a" }, { id:"h_g", name:"ソ", key:"ソ", img:"h_g.png", sound:"h_g.m4a" }, { id:"h_f", name:"ファ", key:"ファ", img:"h_f.png", sound:"h_f.m4a" }, { id:"h_e", name:"ミ", key:"ミ", img:"h_e.png", sound:"h_e.m4a" } ]
 };
+const introductionCards = [ { id:"h_cdo", name:"ど", key:"ド", img:"h_cdo.png", sound:"h_cdo.m4a" }, { id:"t_c1", name:"1点ド", key:"ド", img:"t_c1.png", sound:"t_c1.m4a" } ];
+const allCards = { 1: [ ...trebleCards[1] ], 2: [ ...trebleCards[4] ], 3: [ ...bassCards[2] ], 4: [ ...trebleCards[1], ...bassCards[1] ] };
 
-const levelDescriptions = {
-  treble: {
-    1: "1点ド → 1点レ → 1点ミ → 1点ファ → 1点ソ → 1点ラ → 1点シ → 2点ド",
-    2: "2点ド → 2点レ → 2点ミ → 2点ファ → 2点ソ → 2点ラ → 2点シ → 3点ド",
-    3: "3点ド → 3点レ → 3点ミ",
-    4: "ミ → ファ → ソ → ラ → シ → 1点ド → 1点レ → 1点ミ → 1点ファ"
-  },
-  bass: {
-    1: "1点ド → シ → ラ → ソ → ファ → ミ → レ → ド",
-    2: "ド → し → ら → そ → ふぁ →み → れ → ど",
-    3: "ど → 大文字シ → 大文字ラ",
-    4: "1点ファ → 1点ミ → 1点レ → 1点ド → シ → ラ → ソ → ファ → ミ"
-  }
-};
-
-const introductionCards = [
-  { id:"h_cdo", name:"ど", key:"ド", img:"h_cdo.png", sound:"h_cdo.m4a" },
-  { id:"h_c00", name:"ド", key:"ド", img:"h_c00.png", sound:"h_c00.m4a" },
-  { id:"h_c1", name:"1点ド", key:"ド", img:"h_c1.png", sound:"h_c1.m4a" },
-  { id:"t_c1", name:"1点ド", key:"ド", img:"t_c1.png", sound:"t_c1.m4a" },
-  { id:"t_c2", name:"2点ド", key:"ド", img:"t_c2.png", sound:"t_c2.m4a" },
-  { id:"t_c3", name:"3点ド", key:"ド", img:"t_c3.png", sound:"t_c3.m4a" }
-];
-
-const allCards = {
-  1: [ ...trebleCards[1], ...trebleCards[2], ...trebleCards[3] ],
-  2: [ ...trebleCards[4], ...bassCards[4] ],
-  3: [
-    { id:"h_aRa1", name:"大文字ラ", key:"ラ", img:"h_aRa1.png", sound:"h_aRa1.m4a" },
-    { id:"h_bSi1", name:"大文字シ", key:"シ", img:"h_bSi1.png", sound:"h_bSi1.m4a" },
-    { id:"h_cdo", name:"ど", key:"ド", img:"h_cdo.png", sound:"h_cdo.m4a" },
-    { id:"h_dre", name:"れ", key:"レ", img:"h_dre.png", sound:"h_dre.m4a" },
-    { id:"h_emi", name:"み", key:"ミ", img:"h_emi.png", sound:"h_emi.m4a" },
-    { id:"h_ffa", name:"ふぁ", key:"ファ", img:"h_ffa.png", sound:"h_ffa.m4a" },
-    { id:"h_gso", name:"そ", key:"ソ", img:"h_gso.png", sound:"h_gso.m4a" },
-    { id:"h_ara", name:"ら", key:"ラ", img:"h_ara.png", sound:"h_ara.m4a" },
-    { id:"h_bsi", name:"し", key:"シ", img:"h_bsi.png", sound:"h_bsi.m4a" },
-    { id:"h_c00", name:"ド", key:"ド", img:"h_c00.png", sound:"h_c00.m4a" },
-    { id:"h_d", name:"レ", key:"レ", img:"h_d.png", sound:"h_d.m4a" },
-    { id:"h_e", name:"ミ", key:"ミ", img:"h_e.png", sound:"h_e.m4a" },
-    { id:"h_f", name:"ファ", key:"ファ", img:"h_f.png", sound:"h_f.m4a" },
-    { id:"h_g", name:"ソ", key:"ソ", img:"h_g.png", sound:"h_g.m4a" },
-    { id:"h_a0", name:"ラ", key:"ラ", img:"h_a0.png", sound:"h_a0.m4a" },
-    { id:"h_b0", name:"シ", key:"シ", img:"h_b0.png", sound:"h_b0.m4a" },
-    { id:"h_c1", name:"1点ド", key:"ド", img:"h_c1.png", sound:"h_c1.m4a" }
-  ],
-  4: [
-    ...trebleCards[1], ...trebleCards[2], ...trebleCards[3], ...trebleCards[4],
-    ...bassCards[1], ...bassCards[2], ...bassCards[3], ...bassCards[4]
-  ]
-};
-
-const allLevelDescriptions = {
-  1: "ト音記号：1点ド〜3点ミ",
-  2: "ト音記号後半 ＆ ヘ音記号後半",
-  3: "ヘ音記号・特殊音符系",
-  4: "ト音記号・ヘ音記号 全て"
-};
-
-/* =========================================================
-   状態管理・プロフィール
-========================================================= */
-
+/* 状態管理 */
 let profiles = JSON.parse(localStorage.getItem("onpu_profiles")) || ["", "", ""];
 let activeProfileIndex = parseInt(localStorage.getItem("onpu_active_profile")) || 0;
 
-let selectedClef = null;
-let selectedLevel = null;
-let currentCards = [];
-let currentIndex = 0;
-let touchStartX = 0;
+let selectedClef = null, selectedLevel = null, currentCards = [];
+let currentIndex = 0, trainingMode = false, trainingLocked = false, lastTrainingIndex = -1;
+let trainingType = 'count', targetValue = 10, remainingTime = 0, timeTimer = null;
+let trainingQuestionCount = 0, trainingMistakes = 0, currentCombo = 0, trainingStartTime = 0;
 
-let trainingMode = false;
-let trainingLocked = false;
-let lastTrainingIndex = -1;
-
-let trainingChimeTimer = null;
-let nextTrainingTimer = null;
-
-let trainingQuestionCount = 0;
-let targetTotalQuestions = 10;
-let trainingStartTime = 0;
-let trainingMistakes = 0;
-let currentCombo = 0;
-
-/* =========================================================
-   初期化・プロフィール処理
-========================================================= */
-
+/* 初期化 */
 function initProfiles() {
   const select = document.getElementById("profileSelect");
   select.innerHTML = '<option value="">-- プレイヤーを選択 --</option>';
-
-  let hasValid = false;
   profiles.forEach((name, idx) => {
     if (name) {
-      hasValid = true;
       const opt = document.createElement("option");
-      opt.value = idx;
-      opt.textContent = `プレイヤー ${idx+1}: ${name}`;
+      opt.value = idx; opt.textContent = `プレイヤー ${idx+1}: ${name}`;
       if (idx === activeProfileIndex) opt.selected = true;
       select.appendChild(opt);
     }
   });
-
-  const currentNameDisplay = document.getElementById("currentProfileName");
-  if (profiles[activeProfileIndex]) {
-    currentNameDisplay.textContent = profiles[activeProfileIndex];
-  } else {
-    currentNameDisplay.textContent = "未登録（クリックして登録）";
-    if (!hasValid) openProfileModal();
-  }
+  document.getElementById("currentProfileName").textContent = profiles[activeProfileIndex] || "未登録（先生画面から登録）";
 }
 
 function switchProfile(val) {
@@ -961,298 +329,136 @@ function switchProfile(val) {
   initProfiles();
 }
 
-function openProfileModal() {
-  document.getElementById("slotSelect").value = activeProfileIndex;
-  document.getElementById("profileInputName").value = profiles[activeProfileIndex] || "";
-  document.getElementById("profileModal").classList.remove("hidden");
+/* 管理者モーダル */
+function openAdminModal() {
+  document.getElementById("adminAuthSection").classList.remove("hidden");
+  document.getElementById("adminEditSection").classList.add("hidden");
+  document.getElementById("adminPassInput").value = "";
+  document.getElementById("adminModal").classList.remove("hidden");
 }
-
+function verifyAdminPass() {
+  if (document.getElementById("adminPassInput").value === "1234") {
+    document.getElementById("adminAuthSection").classList.add("hidden");
+    document.getElementById("adminEditSection").classList.remove("hidden");
+    document.getElementById("slotSelect").value = activeProfileIndex;
+    document.getElementById("profileInputName").value = profiles[activeProfileIndex] || "";
+  } else { alert("パスワードが違います"); }
+}
 function saveProfile() {
   const slot = parseInt(document.getElementById("slotSelect").value);
   const name = document.getElementById("profileInputName").value.trim();
-  if (!name) {
-    alert("名前を入力してください");
-    return;
-  }
-  profiles[slot] = name;
-  activeProfileIndex = slot;
+  if (!name) return alert("名前を入力してください");
+  profiles[slot] = name; activeProfileIndex = slot;
   localStorage.setItem("onpu_profiles", JSON.stringify(profiles));
   localStorage.setItem("onpu_active_profile", activeProfileIndex);
-  document.getElementById("profileModal").classList.add("hidden");
-  initProfiles();
+  closeAdminModal(); initProfiles();
 }
+function closeAdminModal() { document.getElementById("adminModal").classList.add("hidden"); }
 
-/* =========================================================
-   画面切り替え
-========================================================= */
-
-function hideAllScreens() {
-  document.querySelectorAll(".screen, .card-screen").forEach(s => s.classList.add("hidden"));
-}
-
-function showSelectScreen() {
-  hideAllScreens();
-  if (trainingChimeTimer) clearTimeout(trainingChimeTimer);
-  if (nextTrainingTimer) clearTimeout(nextTrainingTimer);
-
-  document.getElementById("selectScreen").classList.remove("hidden");
-  selectedClef = null;
-  selectedLevel = null;
-  trainingMode = false;
-  trainingLocked = false;
-  initProfiles();
-}
-
-/* =========================================================
-   はじめに・レベル選択
-========================================================= */
-
-function startIntroduction() {
-  if (!profiles[activeProfileIndex]) {
-    alert("先に教室ネーム（プレイヤー）を登録してください！");
-    openProfileModal();
-    return;
-  }
-  selectedClef = "introduction";
-  selectedLevel = 0;
-  currentIndex = 0;
-  trainingMode = false;
-  trainingLocked = false;
-  lastTrainingIndex = -1;
-
-  currentCards = introductionCards;
-  hideAllScreens();
-
-  const cardScreen = document.getElementById("cardScreen");
-  cardScreen.classList.remove("hidden");
-  cardScreen.classList.remove("training-mode");
-  document.getElementById("levelBadge").textContent = "🔰";
-  showCurrentCard();
-}
+/* ナビゲーション */
+function hideAllScreens() { document.querySelectorAll(".screen, .card-screen, .cover-screen").forEach(s => s.classList.add("hidden")); }
+function showSelectScreen() { hideAllScreens(); document.getElementById("selectScreen").classList.remove("hidden"); initProfiles(); }
 
 function selectClef(clef) {
-  if (!profiles[activeProfileIndex]) {
-    alert("先に教室ネーム（プレイヤー）を登録してください！");
-    openProfileModal();
-    return;
-  }
-  selectedClef = clef;
-  hideAllScreens();
-
+  if (!profiles[activeProfileIndex]) return openAdminModal();
+  selectedClef = clef; hideAllScreens();
   document.getElementById("levelScreen").classList.remove("hidden");
-  const title = document.getElementById("levelTitle");
-  if (clef === "treble") title.textContent = "ト音記号";
-  else if (clef === "bass") title.textContent = "ヘ音記号";
-  else title.textContent = "全カード";
-
   createLevelButtons();
 }
 
 function createLevelButtons() {
-  const list = document.getElementById("levelList");
-  list.innerHTML = "";
-
-  const isAll = (selectedClef === "all");
-  const descriptions = isAll ? allLevelDescriptions : levelDescriptions[selectedClef];
-
+  const list = document.getElementById("levelList"); list.innerHTML = "";
   for (let level = 1; level <= 4; level++) {
-    const button = document.createElement("button");
-    button.className = "level-button";
-
+    const button = document.createElement("button"); button.className = "level-button";
     let isLocked = false;
-    if (level > 1 && selectedClef !== "introduction") {
-      const prevKey = `onpu_best_${activeProfileIndex}_${selectedClef}_${level-1}`;
-      const prevData = JSON.parse(localStorage.getItem(prevKey));
-      if (!prevData || prevData.accuracy < 90) {
-        isLocked = true;
-      }
+    if (level > 1) {
+      const prev = JSON.parse(localStorage.getItem(`onpu_best_${activeProfileIndex}_${selectedClef}_${level-1}`));
+      if (!prev || prev.accuracy < 90) isLocked = true;
     }
-
-    const number = document.createElement("span");
-    number.className = "level-number";
-    number.textContent = `レベル ${level}`;
-
-    const description = document.createElement("span");
-    description.className = "level-description";
-    description.textContent = descriptions[level];
-
-    button.appendChild(number);
-    button.appendChild(description);
-
-    if (isLocked) {
-      const lockBadge = document.createElement("span");
-      lockBadge.className = "locked-badge";
-      lockBadge.textContent = "🔒 前Lv 90%で開放";
-      button.appendChild(lockBadge);
-      button.onclick = () => alert("前のレベルで正答率90%以上を獲得すると遊べるようになります！");
-    } else {
-      button.onclick = () => startLevel(level);
-    }
-
+    button.innerHTML = `<span class="level-number">レベル ${level}</span>`;
+    if (isLocked) button.innerHTML += `<span class="locked-badge">🔒 前Lv 90%で開放</span>`;
+    button.onclick = () => isLocked ? alert("前のレベルで90%以上を獲得すると解放されます！") : showLevelCover(level);
     list.appendChild(button);
   }
 }
 
-function showLevelScreen() {
-  hideAllScreens();
-  if (trainingChimeTimer) clearTimeout(trainingChimeTimer);
-  if (nextTrainingTimer) clearTimeout(nextTrainingTimer);
-  document.getElementById("levelScreen").classList.remove("hidden");
-  trainingMode = false;
-  trainingLocked = false;
-  createLevelButtons();
+/* レベル表紙画面表示 (Level_start.png) */
+function showLevelCover(level) {
+  selectedLevel = level; hideAllScreens();
+  document.getElementById("coverLevelNumber").textContent = level;
+  document.getElementById("coverScreen").classList.remove("hidden");
 }
 
-function startLevel(level) {
-  selectedLevel = level;
-  currentIndex = 0;
-  trainingMode = false;
-  trainingLocked = false;
-  lastTrainingIndex = -1;
+function proceedToCards() {
+  if (selectedClef === "treble") currentCards = trebleCards[selectedLevel];
+  else if (selectedClef === "bass") currentCards = bassCards[selectedLevel];
+  else currentCards = allCards[selectedLevel];
 
-  if (selectedClef === "treble") currentCards = trebleCards[level];
-  else if (selectedClef === "bass") currentCards = bassCards[level];
-  else currentCards = allCards[level];
-
+  currentIndex = 0; trainingMode = false;
   hideAllScreens();
-  const cardScreen = document.getElementById("cardScreen");
-  cardScreen.classList.remove("hidden");
-  cardScreen.classList.remove("training-mode");
-  document.getElementById("levelBadge").textContent = `Lv.${level}`;
+  document.getElementById("cardScreen").classList.remove("hidden");
+  document.getElementById("levelBadge").textContent = `Lv.${selectedLevel}`;
   showCurrentCard();
 }
 
-/* =========================================================
-   カード表示・操作
-========================================================= */
-
 function showCurrentCard() {
   if (!currentCards.length) return;
-  const card = currentCards[currentIndex];
-  const image = document.getElementById("noteCardImg");
-  image.src = card.img;
-  image.alt = card.name;
-
-  const cover = document.getElementById("trainingCover");
-  cover.classList.toggle("hidden", !trainingMode);
-  cover.classList.remove("reveal");
+  document.getElementById("noteCardImg").src = currentCards[currentIndex].img;
+  document.getElementById("trainingCover").classList.toggle("hidden", !trainingMode);
+  document.getElementById("trainingCover").classList.remove("reveal");
   document.getElementById("correctCircle").classList.remove("show");
   document.getElementById("comboPopup").classList.add("hidden");
 }
 
-function nextCard() {
-  if (!currentCards.length || trainingMode) return;
-  currentIndex = (currentIndex + 1) % currentCards.length;
-  showCurrentCard();
-}
+function nextCard() { if (!trainingMode) { currentIndex = (currentIndex + 1) % currentCards.length; showCurrentCard(); } }
+function previousCard() { if (!trainingMode) { currentIndex = (currentIndex - 1 + currentCards.length) % currentCards.length; showCurrentCard(); } }
 
-function previousCard() {
-  if (!currentCards.length || trainingMode) return;
-  currentIndex = (currentIndex - 1 + currentCards.length) % currentCards.length;
-  showCurrentCard();
-}
-
-/* =========================================================
-   トレーニング設定・開始
-========================================================= */
-
+/* トレーニング設定モーダル */
 function openTrainingSettings() {
-  if (!currentCards.length) return;
+  const unlock20 = localStorage.getItem(`onpu_unlock_20_${activeProfileIndex}`) === "true";
+  const unlock30 = localStorage.getItem(`onpu_unlock_30_${activeProfileIndex}`) === "true";
+  
+  document.getElementById("q20Btn").disabled = !unlock20;
+  document.getElementById("q30Btn").disabled = !unlock30;
+  
   document.getElementById("trainingModal").classList.remove("hidden");
 }
+function closeTrainingModal() { document.getElementById("trainingModal").classList.add("hidden"); }
 
-function selectQuestionCount(count, btn) {
-  targetTotalQuestions = count;
+function selectMode(type, val, btn) {
+  trainingType = type; targetValue = val;
   document.querySelectorAll(".q-btn").forEach(b => b.classList.remove("selected"));
   btn.classList.add("selected");
 }
 
-function startTrainingWithConfig() {
-  document.getElementById("resultScreen").classList.add("hidden");
-  openTrainingSettings();
-}
-
 function startTrainingConfirmed() {
-  document.getElementById("trainingModal").classList.add("hidden");
-  if (trainingChimeTimer) clearTimeout(trainingChimeTimer);
-  if (nextTrainingTimer) clearTimeout(nextTrainingTimer);
-
-  trainingMode = true;
-  trainingLocked = false;
-  lastTrainingIndex = -1;
-  trainingQuestionCount = 0;
-  trainingMistakes = 0;
-  currentCombo = 0;
+  closeTrainingModal();
+  trainingMode = true; trainingQuestionCount = 0; trainingMistakes = 0; currentCombo = 0;
   trainingStartTime = Date.now();
+  
+  document.getElementById("timerDisplay").classList.toggle("hidden", trainingType !== 'time');
 
-  hideAllScreens();
-  const cardScreen = document.getElementById("cardScreen");
-  cardScreen.classList.remove("hidden");
-  cardScreen.classList.add("training-mode");
+  if (trainingType === 'time') {
+    remainingTime = targetValue;
+    document.getElementById("timerDisplay").textContent = `⏱️ ${remainingTime}s`;
+    timeTimer = setInterval(() => {
+      remainingTime--;
+      document.getElementById("timerDisplay").textContent = `⏱️ ${remainingTime}s`;
+      if (remainingTime <= 0) { clearInterval(timeTimer); showResultScreen(); }
+    }, 1000);
+  }
 
   showRandomTrainingQuestion();
 }
 
-/* =========================================================
-   苦手優先出題ロジック
-========================================================= */
-
 function showRandomTrainingQuestion() {
-  if (!trainingMode || !currentCards.length) return;
-
-  if (trainingQuestionCount >= targetTotalQuestions) {
-    showResultScreen();
-    return;
+  if (trainingType === 'count' && trainingQuestionCount >= targetValue) {
+    showResultScreen(); return;
   }
-
-  if (trainingChimeTimer) clearTimeout(trainingChimeTimer);
-  if (nextTrainingTimer) clearTimeout(nextTrainingTimer);
-
-  let newIndex;
-  if (currentCards.length === 1) {
-    newIndex = 0;
-  } else {
-    const weights = currentCards.map(card => {
-      const mistakeKey = `onpu_mistake_${activeProfileIndex}_${card.id}`;
-      const misses = parseInt(localStorage.getItem(mistakeKey)) || 0;
-      return misses + 1;
-    });
-
-    const totalWeight = weights.reduce((a, b) => a + b, 0);
-    let randomVal = Math.random() * totalWeight;
-    
-    newIndex = 0;
-    for (let i = 0; i < weights.length; i++) {
-      randomVal -= weights[i];
-      if (randomVal <= 0) {
-        newIndex = i;
-        break;
-      }
-    }
-    if (newIndex === lastTrainingIndex && currentCards.length > 1) {
-      newIndex = (newIndex + 1) % currentCards.length;
-    }
-  }
-
-  lastTrainingIndex = newIndex;
-  currentIndex = newIndex;
+  currentIndex = Math.floor(Math.random() * currentCards.length);
   trainingLocked = false;
-
-  const card = currentCards[currentIndex];
-  const image = document.getElementById("noteCardImg");
-  image.src = card.img;
-  image.alt = "";
-
-  const cover = document.getElementById("trainingCover");
-  cover.classList.remove("hidden");
-  cover.classList.remove("reveal");
-  document.getElementById("correctCircle").classList.remove("show");
-  document.getElementById("comboPopup").classList.add("hidden");
+  showCurrentCard();
 }
-
-/* =========================================================
-   鍵盤入力・判定
-========================================================= */
 
 function pressKey(key, button) {
   if (!currentCards.length) return;
@@ -1260,276 +466,131 @@ function pressKey(key, button) {
 
   if (trainingMode) {
     if (trainingLocked) return;
-
     if (key !== card.key) {
-      trainingMistakes++;
-      currentCombo = 0;
-      const mistakeKey = `onpu_mistake_${activeProfileIndex}_${card.id}`;
-      const currentMisses = parseInt(localStorage.getItem(mistakeKey)) || 0;
-      localStorage.setItem(mistakeKey, currentMisses + 1);
-
-      button.classList.remove("shake");
-      void button.offsetWidth;
-      button.classList.add("shake");
-      setTimeout(() => button.classList.remove("shake"), 300);
+      trainingMistakes++; currentCombo = 0;
       return;
     }
-
-    trainingLocked = true;
-    trainingQuestionCount++;
-    currentCombo++;
-
-    // 正解時の答え自動チラ見せ
+    trainingLocked = true; trainingQuestionCount++; currentCombo++;
     document.getElementById("trainingCover").classList.add("reveal");
+    
+    // アニメーション＆音
+    const circle = document.getElementById("correctCircle");
+    circle.classList.remove("show"); void circle.offsetWidth; circle.classList.add("show");
+    document.getElementById("correctAudio").play().catch(()=>{});
 
-    playTrainingCorrectSound(card.sound);
-    showCorrectAnimation();
-
-    if (currentCombo >= 2) {
-      const comboPopup = document.getElementById("comboPopup");
-      comboPopup.textContent = `🔥 ${currentCombo}コンボ！`;
-      comboPopup.classList.remove("hidden");
-    }
-
-    nextTrainingTimer = setTimeout(() => {
-      if (trainingMode) showRandomTrainingQuestion();
-    }, 1500);
-
+    setTimeout(() => { if (trainingMode) showRandomTrainingQuestion(); }, 1200);
     return;
   }
-
-  if (key !== card.key) return;
-  playSound(card.sound);
-  showCat(button);
+  if (key === card.key) new Audio(card.sound).play().catch(()=>{});
 }
 
-/* =========================================================
-   リザルト・紙吹雪・GAS連携
-========================================================= */
-
+/* リザルト・成績記録 */
 function showResultScreen() {
   trainingMode = false;
-  const elapsedTime = ((Date.now() - trainingStartTime) / 1000).toFixed(1);
-  const totalAttempts = targetTotalQuestions + trainingMistakes;
-  const accuracy = Math.max(0, Math.round((targetTotalQuestions / totalAttempts) * 100));
+  if (timeTimer) clearInterval(timeTimer);
 
-  // 練習日数のカウント更新
-  recordPracticeDate();
+  const duration = Math.round((Date.now() - trainingStartTime) / 1000);
+  recordPracticeStats(duration);
 
+  const total = trainingQuestionCount + trainingMistakes;
+  const accuracy = total > 0 ? Math.round((trainingQuestionCount / total) * 100) : 0;
+
+  // 問題数開放ロジック
+  if (trainingType === 'count' && targetValue === 10 && accuracy >= 90) {
+    localStorage.setItem(`onpu_unlock_20_${activeProfileIndex}`, "true");
+  }
+  if (trainingType === 'count' && targetValue === 20 && accuracy >= 90) {
+    localStorage.setItem(`onpu_unlock_30_${activeProfileIndex}`, "true");
+  }
+
+  // ベスト記録＆ファンファーレ
   const bestKey = `onpu_best_${activeProfileIndex}_${selectedClef}_${selectedLevel}`;
   const savedBest = JSON.parse(localStorage.getItem(bestKey));
   let isNewRecord = false;
 
-  if (!savedBest || accuracy > savedBest.accuracy || (accuracy === savedBest.accuracy && parseFloat(elapsedTime) < parseFloat(savedBest.time))) {
+  if (!savedBest || accuracy > savedBest.accuracy) {
     isNewRecord = true;
-    localStorage.setItem(bestKey, JSON.stringify({ accuracy, time: elapsedTime, count: targetTotalQuestions }));
+    localStorage.setItem(bestKey, JSON.stringify({ accuracy, time: duration }));
   }
 
   hideAllScreens();
-  document.getElementById("resultScore").textContent = `正答率: ${accuracy}% （正解 ${targetTotalQuestions}問 / ミス ${trainingMistakes}回）`;
-  document.getElementById("resultTime").textContent = `タイム: ${elapsedTime} 秒`;
+  document.getElementById("resultScore").textContent = `正答数: ${trainingQuestionCount}問 （正答率 ${accuracy}%）`;
+  document.getElementById("resultTime").textContent = `タイム: ${duration}秒`;
   
   const bestEl = document.getElementById("resultBest");
   if (isNewRecord) {
     bestEl.textContent = "✨ 過去最高記録更新！";
-  } else {
-    bestEl.textContent = savedBest ? `ベスト記録: 正答率 ${savedBest.accuracy}% (${savedBest.time}秒)` : "";
-  }
+    document.getElementById("fanfareAudio").play().catch(()=>{});
+  } else { bestEl.textContent = ""; }
+
+  // 90%達成時の次レベル案内ボタン
+  const nextBtn = document.getElementById("nextLevelBtn");
+  if (accuracy >= 90 && selectedLevel < 4) {
+    nextBtn.classList.remove("hidden");
+  } else { nextBtn.classList.add("hidden"); }
 
   document.getElementById("resultScreen").classList.remove("hidden");
-
-  // クラッカー（紙吹雪）アニメーションを起動
   startConfetti();
-
-  // Googleスプレッドシートへの自動データ送信
-  sendDataToGoogleSheet({
-    name: profiles[activeProfileIndex],
-    clef: selectedClef,
-    level: selectedLevel,
-    questions: targetTotalQuestions,
-    accuracy: accuracy,
-    time: elapsedTime,
-    date: new Date().toLocaleString()
-  });
 }
 
-function recordPracticeDate() {
+function goToNextLevel() {
+  showLevelCover(selectedLevel + 1);
+}
+
+function recordPracticeStats(durationSec) {
+  // 日数記録
   const dateKey = `onpu_days_${activeProfileIndex}`;
   let days = JSON.parse(localStorage.getItem(dateKey)) || [];
   const today = new Date().toISOString().split('T')[0];
-  if (!days.includes(today)) {
-    days.push(today);
-    localStorage.setItem(dateKey, JSON.stringify(days));
-  }
+  if (!days.includes(today)) { days.push(today); localStorage.setItem(dateKey, JSON.stringify(days)); }
+
+  // 時間記録
+  const timeKey = `onpu_time_${activeProfileIndex}`;
+  let totalSec = parseInt(localStorage.getItem(timeKey)) || 0;
+  localStorage.setItem(timeKey, totalSec + durationSec);
 }
-
-function sendDataToGoogleSheet(data) {
-  const GAS_URL = "ここにGASのウェブアプリURLを貼り付け"; 
-  if (GAS_URL.includes("ここ")) return;
-
-  fetch(GAS_URL, {
-    method: "POST",
-    mode: "no-cors",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
-  }).catch(err => console.log("送信エラー", err));
-}
-
-/* =========================================================
-   紙吹雪（クラッカー）アニメーション処理
-========================================================= */
-
-function startConfetti() {
-  const canvas = document.getElementById("confettiCanvas");
-  const ctx = canvas.getContext("2d");
-  canvas.width = canvas.parentElement.clientWidth;
-  canvas.height = canvas.parentElement.clientHeight;
-
-  const pieces = [];
-  const colors = ['#e99595', '#e6b26a', '#d6c45d', '#8dbb8d', '#78a9c8', '#b28bb9'];
-
-  for (let i = 0; i < 60; i++) {
-    pieces.push({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height - canvas.height,
-      size: Math.random() * 8 + 4,
-      color: colors[Math.floor(Math.random() * colors.length)],
-      speed: Math.random() * 3 + 2,
-      rotation: Math.random() * 360,
-      rotSpeed: Math.random() * 6 - 3
-    });
-  }
-
-  let animationFrame;
-  let timer = 0;
-
-  function update() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    timer++;
-
-    pieces.forEach(p => {
-      p.y += p.speed;
-      p.rotation += p.rotSpeed;
-
-      ctx.save();
-      ctx.translate(p.x, p.y);
-      ctx.rotate((p.rotation * Math.PI) / 180);
-      ctx.fillStyle = p.color;
-      ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
-      ctx.restore();
-    });
-
-    if (timer < 180) { // 約3秒間降らせる
-      animationFrame = requestAnimationFrame(update);
-    } else {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-    }
-  }
-
-  update();
-}
-
-/* =========================================================
-   成績確認画面の描画
-========================================================= */
 
 function showScoreScreen() {
   hideAllScreens();
   const container = document.getElementById("scoreContent");
-  container.innerHTML = "";
-
-  // 1. プレイヤー別タイム比較
-  let rankHtml = `<div class="score-card"><div class="score-card-title">🏆 プレイヤー比較（ト音記号 Lv1ベスト）</div>`;
-  profiles.forEach((name, idx) => {
-    if (name) {
-      const best = JSON.parse(localStorage.getItem(`onpu_best_${idx}_treble_1`));
-      const val = best ? `${best.time} 秒 (${best.accuracy}%)` : "未クリア";
-      rankHtml += `<div class="score-row"><span>${name}</span><strong>${val}</strong></div>`;
-    }
-  });
-  rankHtml += `</div>`;
-
-  // 2. 現在のプレイヤーのがんばり
   const activeName = profiles[activeProfileIndex] || "未選択";
   const days = JSON.parse(localStorage.getItem(`onpu_days_${activeProfileIndex}`)) || [];
+  const totalSec = parseInt(localStorage.getItem(`onpu_time_${activeProfileIndex}`)) || 0;
+  
+  const mins = Math.floor(totalSec / 60);
+  const secs = totalSec % 60;
 
-  let activeHtml = `<div class="score-card">
-    <div class="score-card-title">📅 ${activeName} さんの練習記録</div>
-    <div class="score-row"><span>今月の練習日数</span><strong>${days.length} 日</strong></div>
-  </div>`;
-
-  container.innerHTML = rankHtml + activeHtml;
+  container.innerHTML = `
+    <div class="score-card">
+      <div class="score-card-title">📅 ${activeName} さんの練習記録</div>
+      <div class="score-row"><span>今月の練習日数</span><strong>${days.length} 日</strong></div>
+      <div class="score-row"><span>総練習時間</span><strong>${mins}分 ${secs}秒</strong></div>
+    </div>
+  `;
   document.getElementById("scoreScreen").classList.remove("hidden");
 }
 
-/* =========================================================
-   音声・演出
-========================================================= */
-
-function playSound(filename) {
-  const audio = new Audio(filename);
-  audio.currentTime = 0;
-  audio.play().catch(() => {});
+/* 紙吹雪演出 */
+function startConfetti() {
+  const canvas = document.getElementById("confettiCanvas");
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.parentElement.clientWidth; canvas.height = canvas.parentElement.clientHeight;
+  const pieces = Array.from({length: 50}, () => ({
+    x: Math.random() * canvas.width, y: Math.random() * canvas.height - canvas.height,
+    size: Math.random() * 8 + 4, color: ['#e99595', '#e6b26a', '#78a9c8', '#b28bb9'][Math.floor(Math.random()*4)],
+    speed: Math.random() * 3 + 2
+  }));
+  let timer = 0;
+  function update() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    pieces.forEach(p => { p.y += p.speed; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, p.size, p.size); });
+    if (timer++ < 120) requestAnimationFrame(update); else ctx.clearRect(0,0,canvas.width,canvas.height);
+  }
+  update();
 }
 
-const sharedAudio = document.getElementById("sharedAudio");
-const correctAudio = document.getElementById("correctAudio");
-
-function playTrainingCorrectSound(cardSound) {
-  if (trainingChimeTimer) clearTimeout(trainingChimeTimer);
-  sharedAudio.pause();
-  sharedAudio.src = cardSound;
-  sharedAudio.currentTime = 0;
-  sharedAudio.play().catch(() => {});
-
-  correctAudio.pause();
-  correctAudio.currentTime = 0;
-  correctAudio.play().catch(() => {});
-}
-
-function showCorrectAnimation() {
-  const circle = document.getElementById("correctCircle");
-  circle.classList.remove("show");
-  void circle.offsetWidth;
-  circle.classList.add("show");
-}
-
-function showCat(button) {
-  const oldCat = button.querySelector(".cat");
-  if (oldCat) oldCat.remove();
-  const cat = document.createElement("img");
-  cat.className = "cat";
-  cat.src = "cat.PNG";
-  cat.alt = "";
-  button.appendChild(cat);
-  setTimeout(() => { if (cat.parentNode === button) cat.remove(); }, 900);
-}
-
-/* =========================================================
-   スワイプ操作
-========================================================= */
-
-function touchStart(event) {
-  if (!event.changedTouches.length) return;
-  touchStartX = event.changedTouches[0].clientX;
-}
-
-function touchEnd(event) {
-  if (!event.changedTouches.length || trainingMode) return;
-  const endX = event.changedTouches[0].clientX;
-  const diff = endX - touchStartX;
-  if (Math.abs(diff) < 50) return;
-  if (diff < 0) nextCard();
-  else previousCard();
-}
-
-/* =========================================================
-   アプリ起動
-========================================================= */
-
+function startIntroduction() { showLevelCover(1); }
 showSelectScreen();
-
 </script>
-
 </body>
 </html>
