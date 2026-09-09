@@ -44,10 +44,17 @@ body { display: flex; justify-content: center; align-items: center; }
 .select-button {
   width: 100%; border: none; border-radius: 18px; padding: 15px 12px; margin-bottom: 10px;
   background: white; color: #5b4636; font-size: 17px; font-weight: 700;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06); cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06); cursor: pointer; position: relative;
 }
 .select-button.accent { background: #78a9c8; color: white; }
 .select-button.info { background: #e6b26a; color: white; }
+.select-button.special { background: #8dbb8d; color: white; }
+.select-button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.lock-tag {
+  position: absolute; right: 15px; top: 50%; transform: translateY(-50%);
+  font-size: 12px; background: rgba(0,0,0,0.15); padding: 3px 8px; border-radius: 10px;
+}
 
 /* レベル画面 */
 .level-list { display: flex; flex-direction: column; gap: 12px; }
@@ -58,16 +65,12 @@ body { display: flex; justify-content: center; align-items: center; }
 .level-number { display: block; font-size: 18px; font-weight: 700; }
 .locked-badge { position: absolute; top: 16px; right: 16px; background: #e99595; color: white; padding: 4px 10px; border-radius: 10px; font-size: 12px; font-weight: 700; }
 
-/* レベル表紙画面 (level_start.png) */
+/* レベル表紙画面 */
 .cover-screen {
   position: relative; width: 100%; height: 100%;
-  background-color: #fdf8ed;
-  display: flex; align-items: center; justify-content: center;
-  overflow: hidden;
+  background-color: #fdf8ed; display: flex; align-items: center; justify-content: center; overflow: hidden;
 }
-.cover-img {
-  width: 100%; height: 100%; object-fit: contain; position: absolute; top: 0; left: 0;
-}
+.cover-img { width: 100%; height: 100%; object-fit: contain; position: absolute; top: 0; left: 0; }
 .cover-level-number {
   position: absolute; top: 31.5%; left: 50%; transform: translate(-50%, -50%);
   font-size: 75px; font-weight: 900; color: #5b4636;
@@ -104,6 +107,17 @@ body { display: flex; justify-content: center; align-items: center; }
   100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 }
 
+.incorrect-x {
+  position: absolute; font-size: 140px; color: #f04444; font-weight: 900;
+  left: 50%; top: 34%; transform: translate(-50%, -50%) scale(0.2); opacity: 0; pointer-events: none;
+}
+.incorrect-x.show { animation: incorrectX 0.5s ease-out forwards; }
+@keyframes incorrectX {
+  0% { transform: translate(-50%, -50%) scale(0.2); opacity: 0; }
+  50% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+}
+
 .arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 42px; height: 42px; border: none; border-radius: 50%; background: rgba(253,248,237,0.95); font-size: 28px; cursor: pointer; }
 .arrow-left { left: 8px; } .arrow-right { right: 8px; }
 
@@ -129,11 +143,11 @@ body { display: flex; justify-content: center; align-items: center; }
 
 /* リザルト */
 .result-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; position: relative; }
+.result-clef-badge { display: inline-block; background: #eadcc8; color: #5b4636; font-size: 15px; font-weight: 700; padding: 4px 14px; border-radius: 12px; margin-bottom: 8px; }
 .result-title { font-size: 26px; font-weight: 700; color: #5b4636; margin-bottom: 12px; }
 .result-message { font-size: 16px; font-weight: 700; color: #78a9c8; margin-bottom: 12px; }
 .result-detail { font-size: 18px; color: #806c5a; margin-bottom: 8px; }
 
-/* チカチカ点滅アニメーション */
 .result-best {
   font-size: 18px; color: #e99595; font-weight: 800; margin-bottom: 20px;
   animation: blinkText 0.8s ease-in-out infinite alternate;
@@ -154,6 +168,7 @@ body { display: flex; justify-content: center; align-items: center; }
 <body>
 
 <audio id="seikaiAudio" preload="auto" src="seikai.mp3"></audio>
+<audio id="bubuAudio" preload="auto" src="bubu.mp3"></audio>
 <audio id="fanfareAudio" preload="auto" src="tassei-fanfare.mp3"></audio>
 
 <div class="app-container">
@@ -172,12 +187,21 @@ body { display: flex; justify-content: center; align-items: center; }
       <button class="profile-edit-btn" onclick="openAdminModal()">🔒 教室ネームの登録・変更（先生）</button>
     </div>
 
-    <!-- はじめに ボタン -->
+    <!-- はじめに / 6つのド -->
     <button class="select-button info" onclick="openIntroModal()">📖 はじめに（つかいかた）</button>
+    <button class="select-button special" onclick="startDoLesson()">🎵 6つの「ド」をおぼえよう！</button>
+    
     <button class="select-button accent" onclick="showScoreScreen()">🏆 せいせき・ランキングをみる</button>
-    <button class="select-button" onclick="selectClef('treble')">ト音記号</button>
-    <button class="select-button" onclick="selectClef('bass')">ヘ音記号</button>
-    <button class="select-button" onclick="selectClef('all')">全カード</button>
+
+    <button id="btnTreble" class="select-button" onclick="selectClef('treble')">
+      ト音記号 <span id="lockTreble" class="lock-tag">🔒 6つのドクリアで解放</span>
+    </button>
+    <button id="btnBass" class="select-button" onclick="selectClef('bass')">
+      ヘ音記号 <span id="lockBass" class="lock-tag">🔒 6つのドクリアで解放</span>
+    </button>
+    <button id="btnAll" class="select-button" onclick="selectClef('all')">
+      全カード <span id="lockAll" class="lock-tag">🔒 6つのドクリアで解放</span>
+    </button>
   </section>
 
   <!-- レベル選択画面 -->
@@ -190,7 +214,7 @@ body { display: flex; justify-content: center; align-items: center; }
     <div id="levelList" class="level-list"></div>
   </section>
 
-  <!-- レベル表紙画面 (level_start.png) -->
+  <!-- レベル表紙画面 -->
   <section id="coverScreen" class="cover-screen hidden">
     <img src="level_start.png" class="cover-img" alt="レベルスタート">
     <div id="coverLevelNumber" class="cover-level-number">1</div>
@@ -209,7 +233,7 @@ body { display: flex; justify-content: center; align-items: center; }
   <!-- カード画面 -->
   <section id="cardScreen" class="card-screen hidden">
     <div class="card-header">
-      <button class="card-back" onclick="showLevelScreen()">＜ 戻る</button>
+      <button class="card-back" onclick="handleCardBack()">＜ 戻る</button>
       <div class="level-badge" id="levelBadge">Lv.1</div>
       <div class="card-title">おんぷカード</div>
       <button id="trainingButton" class="training-btn" onclick="openTrainingSettings()">トレーニング</button>
@@ -225,6 +249,7 @@ body { display: flex; justify-content: center; align-items: center; }
       </div>
 
       <div id="correctCircle" class="correct-circle"></div>
+      <div id="incorrectX" class="incorrect-x">×</div>
       <button class="arrow arrow-right" onclick="nextCard()">›</button>
     </div>
 
@@ -243,12 +268,13 @@ body { display: flex; justify-content: center; align-items: center; }
   <section id="resultScreen" class="screen hidden">
     <canvas id="confettiCanvas"></canvas>
     <div class="result-container">
+      <div class="result-clef-badge" id="resultClefBadge">ト音記号 レベル1</div>
       <div class="result-title" id="resultTitle">🎉 クリア！</div>
       <div class="result-message" id="resultMessage"></div>
       <div class="result-detail" id="resultScore">正答率: 100%</div>
       <div class="result-detail" id="resultTime">タイム: 0.0秒</div>
       <div class="result-best" id="resultBest">✨ 過去最高記録更新！</div>
-      <button id="nextLevelBtn" class="select-button accent hidden" onclick="goToNextLevel()">🚀 次のレベルへ挑戦する！</button>
+      <button id="nextLevelBtn" class="select-button accent hidden" onclick="goToNextLevel()">🚀 次のステップへ挑戦！</button>
       <button class="select-button" onclick="restartTraining()">もう一度挑戦する</button>
       <button class="select-button" onclick="showSelectScreen()">トップへ戻る</button>
     </div>
@@ -262,22 +288,20 @@ body { display: flex; justify-content: center; align-items: center; }
     <div class="modal-title">📖 はじめに・つかいかた</div>
     <div class="modal-text">
       <strong>🎵 6つのドをおぼえよう！</strong><br>
-      まずは基準になる6つの「ド」のばしょを覚えるのがポイントです！<br>
-      ・<strong>真ん中のド</strong>（ト音Lv.1 / ヘ音Lv.1）<br>
-      ・<strong>高いド</strong>（ト音Lv.2）<br>
-      ・<strong>超高いド</strong>（ト音Lv.3）<br>
-      ・<strong>低いド</strong>（ヘ音Lv.2）<br>
-      ・<strong>超低いド</strong>（ヘ音Lv.3）<br><br>
+      まずは基準となる6つの「ド」のばしょを覚えるのがポイントです！<br>
+      ・<strong>真ん中のド</strong>（ヘ音記号 & ト音記号：2枚）<br>
+      ・<strong>低いド / 超低いド</strong>（ヘ音記号：2枚）<br>
+      ・<strong>高いド / 超高いド</strong>（ト音記号：2枚）<br><br>
       <strong>🎮 あそびかた</strong><br>
-      1. 挑戦したいコースを選びます。<br>
-      2. カードをめくりながら音階（ドレミ…）を確認しよう！<br>
-      3. 右上の「トレーニング」でテスト開始。90%以上で次のレベルが解放されます！
+      1. まずは「6つの『ド』をおぼえよう！」でカード練習＆テスト！<br>
+      2. テストで90%以上をとると、ト音記号やヘ音記号のコースが解放されます！
     </div>
-    <button class="modal-btn" onclick="closeIntroModal()">分かった！</button>
+    <button class="modal-btn" onclick="startDoLessonFromIntro()">6つの「ド」を練習する！</button>
+    <button class="modal-btn cancel" onclick="closeIntroModal()">とじる</button>
   </div>
 </div>
 
-<!-- 管理者認証＆プレイヤー登録モーダル -->
+<!-- 管理者認証モーダル -->
 <div id="adminModal" class="modal-bg hidden">
   <div class="modal-box">
     <div class="modal-title">管理者（先生）設定</div>
@@ -315,12 +339,22 @@ body { display: flex; justify-content: center; align-items: center; }
       <button id="t60Btn" class="q-btn" onclick="selectMode('time', 60, this)">60秒</button>
     </div>
     <button class="modal-btn" onclick="startTrainingConfirmed()">スタート！</button>
-    <button class="modal-btn cancel" onclick="closeTrainingModal()">やっぱりやめる</button>
+    <button class="modal-btn cancel" onclick="closeTrainingModal()">キャンセル</button>
   </div>
 </div>
 
 <script>
-/* カード定義 */
+/* 6つの「ド」の定義（計6枚） */
+const doCards = [
+  { id:"h_c1", key:"ド", img:"h_c1.png", sound:"h_c1.m4a" },   /* 真ん中のド (ヘ音) */
+  { id:"t_c1", key:"ド", img:"t_c1.png", sound:"t_c1.m4a" },   /* 真ん中のド (ト音) */
+  { id:"h_c00", key:"ド", img:"h_c00.png", sound:"h_c00.m4a" }, /* 低いド (ヘ音) */
+  { id:"h_cdo", key:"ド", img:"h_cdo.png", sound:"h_cdo.m4a" }, /* 超低いド (ヘ音) */
+  { id:"t_c2", key:"ド", img:"t_c2.png", sound:"t_c2.m4a" },   /* 高いド (ト音) */
+  { id:"t_c3", key:"ド", img:"t_c3.png", sound:"t_c3.m4a" }    /* 超高いド (ト音) */
+];
+
+/* ト音記号カード */
 const trebleCards = {
   1: [ { id:"t_c1", key:"ド", img:"t_c1.png", sound:"t_c1.m4a" }, { id:"t_d1", key:"レ", img:"t_d1.png", sound:"t_d1.m4a" }, { id:"t_e1", key:"ミ", img:"t_e1.png", sound:"t_e1.m4a" }, { id:"t_f1", key:"ファ", img:"t_f1.png", sound:"t_f1.m4a" }, { id:"t_g1", key:"ソ", img:"t_g1.png", sound:"t_g1.m4a" }, { id:"t_a1", key:"ラ", img:"t_a1.png", sound:"t_a1.m4a" }, { id:"t_b1", key:"シ", img:"t_b1.png", sound:"t_b1.m4a" }, { id:"t_c2", key:"ド", img:"t_c2.png", sound:"t_c2.m4a" } ],
   2: [ { id:"t_c2", key:"ド", img:"t_c2.png", sound:"t_c2.m4a" }, { id:"t_d2", key:"レ", img:"t_d2.png", sound:"t_d2.m4a" }, { id:"t_e2", key:"ミ", img:"t_e2.png", sound:"t_e2.m4a" }, { id:"t_f2", key:"ファ", img:"t_f2.png", sound:"t_f2.m4a" }, { id:"t_g2", key:"ソ", img:"t_g2.png", sound:"t_g2.m4a" }, { id:"t_a2", key:"ラ", img:"t_a2.png", sound:"t_a2.m4a" }, { id:"t_b2", key:"シ", img:"t_b2.png", sound:"t_b2.m4a" }, { id:"t_c3", key:"ド", img:"t_c3.png", sound:"t_c3.m4a" } ],
@@ -329,6 +363,7 @@ const trebleCards = {
 };
 trebleCards[5] = [ ...trebleCards[1], ...trebleCards[2], ...trebleCards[3], ...trebleCards[4] ];
 
+/* ヘ音記号カード */
 const bassCards = {
   1: [ { id:"h_c1", key:"ド", img:"h_c1.png", sound:"h_c1.m4a" }, { id:"h_b0", key:"シ", img:"h_b0.png", sound:"h_b0.m4a" }, { id:"h_a0", key:"ラ", img:"h_a0.png", sound:"h_a0.m4a" }, { id:"h_g", key:"ソ", img:"h_g.png", sound:"h_g.m4a" }, { id:"h_f", key:"ファ", img:"h_f.png", sound:"h_f.m4a" }, { id:"h_e", key:"ミ", img:"h_e.png", sound:"h_e.m4a" }, { id:"h_d", key:"レ", img:"h_d.png", sound:"h_d.m4a" }, { id:"h_c00", key:"ド", img:"h_c00.png", sound:"h_c00.m4a" } ],
   2: [ { id:"h_c00", key:"ド", img:"h_c00.png", sound:"h_c00.m4a" }, { id:"h_bsi", key:"シ", img:"h_bsi.png", sound:"h_bsi.m4a" }, { id:"h_ara", key:"ラ", img:"h_ara.png", sound:"h_ara.m4a" }, { id:"h_gso", key:"ソ", img:"h_gso.png", sound:"h_gso.m4a" }, { id:"h_ffa", key:"ファ", img:"h_ffa.png", sound:"h_ffa.m4a" }, { id:"h_emi", key:"ミ", img:"h_emi.png", sound:"h_emi.m4a" }, { id:"h_dre", key:"レ", img:"h_dre.png", sound:"h_dre.m4a" }, { id:"h_cdo", key:"ド", img:"h_cdo.png", sound:"h_cdo.m4a" } ],
@@ -362,6 +397,20 @@ function initProfiles() {
     }
   });
   document.getElementById("currentProfileName").textContent = profiles[activeProfileIndex] || "未登録（先生画面から登録）";
+  checkDoLockStatus();
+}
+
+function checkDoLockStatus() {
+  const doBest = JSON.parse(localStorage.getItem(`onpu_best_${activeProfileIndex}_do_0`));
+  const isUnlocked = doBest && doBest.accuracy >= 90;
+
+  document.getElementById("btnTreble").disabled = !isUnlocked;
+  document.getElementById("btnBass").disabled = !isUnlocked;
+  document.getElementById("btnAll").disabled = !isUnlocked;
+
+  document.getElementById("lockTreble").style.display = isUnlocked ? "none" : "inline";
+  document.getElementById("lockBass").style.display = isUnlocked ? "none" : "inline";
+  document.getElementById("lockAll").style.display = isUnlocked ? "none" : "inline";
 }
 
 function switchProfile(val) {
@@ -374,6 +423,26 @@ function switchProfile(val) {
 /* 「はじめに」モーダル制御 */
 function openIntroModal() { document.getElementById("introModal").classList.remove("hidden"); }
 function closeIntroModal() { document.getElementById("introModal").classList.add("hidden"); }
+
+function startDoLessonFromIntro() {
+  closeIntroModal();
+  startDoLesson();
+}
+
+/* 「6つのド」レッスン開始 */
+function startDoLesson() {
+  if (!profiles[activeProfileIndex]) return openAdminModal();
+  selectedClef = "do";
+  selectedLevel = 0;
+  currentCards = doCards;
+  currentIndex = 0;
+  trainingMode = false;
+  
+  hideAllScreens();
+  document.getElementById("cardScreen").classList.remove("hidden");
+  document.getElementById("levelBadge").textContent = "6つのド";
+  showCurrentCard();
+}
 
 /* 管理者モーダル */
 function openAdminModal() {
@@ -406,6 +475,14 @@ function hideAllScreens() { document.querySelectorAll(".screen, .card-screen, .c
 function showSelectScreen() { hideAllScreens(); document.getElementById("selectScreen").classList.remove("hidden"); initProfiles(); }
 function showLevelScreen() { hideAllScreens(); document.getElementById("levelScreen").classList.remove("hidden"); createLevelButtons(); }
 
+function handleCardBack() {
+  if (selectedClef === "do") {
+    showSelectScreen();
+  } else {
+    showLevelScreen();
+  }
+}
+
 function selectClef(clef) {
   if (!profiles[activeProfileIndex]) return openAdminModal();
   selectedClef = clef; hideAllScreens();
@@ -429,7 +506,6 @@ function createLevelButtons() {
   }
 }
 
-/* レベル表紙画面表示 (level_start.png) ➔ 自動進行 */
 function showLevelCover(level) {
   selectedLevel = level; hideAllScreens();
   document.getElementById("coverLevelNumber").textContent = level;
@@ -460,6 +536,7 @@ function showCurrentCard() {
   document.getElementById("trainingCover").classList.toggle("hidden", !trainingMode);
   document.getElementById("trainingCover").classList.remove("reveal");
   document.getElementById("correctCircle").classList.remove("show");
+  document.getElementById("incorrectX").classList.remove("show");
 }
 
 function nextCard() { if (!trainingMode) { currentIndex = (currentIndex + 1) % currentCards.length; showCurrentCard(); } }
@@ -488,7 +565,6 @@ function startTrainingConfirmed() {
   startTrainingWithConfig();
 }
 
-/* 直前の設定を保持したままトレーニング即スタート */
 function startTrainingWithConfig() {
   trainingMode = true; trainingQuestionCount = 0; trainingMistakes = 0;
   trainingStartTime = Date.now(); lastTrainingIndex = -1;
@@ -515,7 +591,6 @@ function restartTraining() {
   startTrainingWithConfig();
 }
 
-/* 直前と同じ出題を避けるランダム選曲 */
 function showRandomTrainingQuestion() {
   if (trainingType === 'count' && trainingQuestionCount >= targetValue) {
     showResultScreen(); return;
@@ -540,6 +615,11 @@ function pressKey(key) {
     if (trainingLocked) return;
     if (key !== card.key) {
       trainingMistakes++;
+      const bubu = document.getElementById("bubuAudio");
+      bubu.currentTime = 0; bubu.play().catch(()=>{});
+      
+      const xEl = document.getElementById("incorrectX");
+      xEl.classList.remove("show"); void xEl.offsetWidth; xEl.classList.add("show");
       return;
     }
     trainingLocked = true; trainingQuestionCount++;
@@ -561,7 +641,7 @@ function pressKey(key) {
   }
 }
 
-/* リザルト・成績即時セーブ処理 */
+/* リザルト画面 */
 function showResultScreen() {
   trainingMode = false;
   if (timeTimer) clearInterval(timeTimer);
@@ -589,6 +669,16 @@ function showResultScreen() {
   }
 
   hideAllScreens();
+
+  // 現在のコース・レベルを表示用バッジに反映
+  const badgeEl = document.getElementById("resultClefBadge");
+  if (selectedClef === "do") {
+    badgeEl.textContent = "🎵 6つの「ド」";
+  } else {
+    const clefNames = { treble: "ト音記号", bass: "ヘ音記号", all: "全カード" };
+    badgeEl.textContent = `${clefNames[selectedClef] || ""} レベル ${selectedLevel}`;
+  }
+
   document.getElementById("resultScore").textContent = `正答数: ${trainingQuestionCount}問 （正答率 ${accuracy}%）`;
   document.getElementById("resultTime").textContent = `タイム: ${duration}秒`;
   
@@ -603,7 +693,18 @@ function showResultScreen() {
   const nextBtn = document.getElementById("nextLevelBtn");
   msgEl.textContent = "";
 
-  if (accuracy >= 90) {
+  if (selectedClef === "do") {
+    if (accuracy >= 90) {
+      msgEl.textContent = "6つの「ド」クリア！ト音記号・ヘ音記号コースが解放されました！";
+      nextActionClef = "treble";
+      nextActionLevel = 1;
+      nextBtn.textContent = "🚀 ト音記号 レベル1 へ挑戦する！";
+      nextBtn.classList.remove("hidden");
+    } else {
+      msgEl.textContent = "90%以上でト音記号・ヘ音記号コースが解放されるよ！がんばろう！";
+      nextBtn.classList.add("hidden");
+    }
+  } else if (accuracy >= 90) {
     if (selectedLevel < 5) {
       nextActionClef = selectedClef;
       nextActionLevel = selectedLevel + 1;
@@ -618,28 +719,24 @@ function showResultScreen() {
       if (selectedClef === "treble") {
         if (!bCleared) {
           msgEl.textContent = "ト音記号マスター！次はヘ音記号もがんばってね！";
-          nextActionClef = "bass";
-          nextActionLevel = 1;
+          nextActionClef = "bass"; nextActionLevel = 1;
           nextBtn.textContent = "🚀 ヘ音記号のレベル1へ挑戦する！";
           nextBtn.classList.remove("hidden");
         } else {
           msgEl.textContent = "すごーい！全カードモードへ挑戦しよう！";
-          nextActionClef = "all";
-          nextActionLevel = 1;
+          nextActionClef = "all"; nextActionLevel = 1;
           nextBtn.textContent = "🚀 全カードのレベル1へ挑戦する！";
           nextBtn.classList.remove("hidden");
         }
       } else if (selectedClef === "bass") {
         if (!tCleared) {
           msgEl.textContent = "ヘ音記号マスター！次はト音記号もがんばってね！";
-          nextActionClef = "treble";
-          nextActionLevel = 1;
+          nextActionClef = "treble"; nextActionLevel = 1;
           nextBtn.textContent = "🚀 ト音記号のレベル1へ挑戦する！";
           nextBtn.classList.remove("hidden");
         } else {
           msgEl.textContent = "すごーい！全カードモードへ挑戦しよう！";
-          nextActionClef = "all";
-          nextActionLevel = 1;
+          nextActionClef = "all"; nextActionLevel = 1;
           nextBtn.textContent = "🚀 全カードのレベル1へ挑戦する！";
           nextBtn.classList.remove("hidden");
         }
@@ -657,8 +754,12 @@ function showResultScreen() {
 }
 
 function goToNextLevel() {
-  selectedClef = nextActionClef;
-  showLevelCover(nextActionLevel);
+  if (selectedClef === "do") {
+    selectClef(nextActionClef);
+  } else {
+    selectedClef = nextActionClef;
+    showLevelCover(nextActionLevel);
+  }
 }
 
 function recordPracticeStats(durationSec) {
@@ -682,11 +783,15 @@ function showScoreScreen() {
   const mins = Math.floor(totalSec / 60);
   const secs = totalSec % 60;
 
+  const doBest = JSON.parse(localStorage.getItem(`onpu_best_${activeProfileIndex}_do_0`));
+  const doScoreText = doBest ? `${doBest.accuracy}%` : "未挑戦";
+
   container.innerHTML = `
     <div class="score-card">
       <div class="score-card-title">📅 ${activeName} さんの練習記録</div>
       <div class="score-row"><span>今月の練習日数</span><strong>${days.length} 日</strong></div>
       <div class="score-row"><span>総練習時間</span><strong>${mins}分 ${secs}秒</strong></div>
+      <div class="score-row"><span>6つのド テスト最高点</span><strong>${doScoreText}</strong></div>
     </div>
   `;
   document.getElementById("scoreScreen").classList.remove("hidden");
