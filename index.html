@@ -57,21 +57,21 @@ body { display: flex; justify-content: center; align-items: center; }
 .level-number { display: block; font-size: 18px; font-weight: 700; }
 .locked-badge { position: absolute; top: 16px; right: 16px; background: #e99595; color: white; padding: 4px 10px; border-radius: 10px; font-size: 12px; font-weight: 700; }
 
-/* レベル表紙画面 (Level_start.png) 修正 */
+/* レベル表紙画面 (level_start.png) 画像・文字のぴったり中央配置修正 */
 .cover-screen {
   position: relative; width: 100%; height: 100%;
   background-color: #fdf8ed;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   overflow: hidden;
 }
 .cover-img {
   width: 100%; height: 100%; object-fit: contain; position: absolute; top: 0; left: 0;
 }
 .cover-level-number {
-  position: absolute; top: 31%; left: 50%; transform: translateX(-50%);
-  font-size: 72px; font-weight: 900; color: #5b4636;
-  text-shadow: 3px 3px 0px #fff, -3px -3px 0px #fff, 3px -3px 0px #fff, -3px 3px 0px #fff;
-  z-index: 10;
+  position: absolute; top: 31.5%; left: 50%; transform: translate(-50%, -50%);
+  font-size: 75px; font-weight: 900; color: #5b4636;
+  text-shadow: 4px 4px 0px #fff, -4px -4px 0px #fff, 4px -4px 0px #fff, -4px 4px 0px #fff;
+  z-index: 10; pointer-events: none;
 }
 
 /* カード画面 */
@@ -130,7 +130,16 @@ body { display: flex; justify-content: center; align-items: center; }
 .result-title { font-size: 26px; font-weight: 700; color: #5b4636; margin-bottom: 12px; }
 .result-message { font-size: 16px; font-weight: 700; color: #78a9c8; margin-bottom: 12px; }
 .result-detail { font-size: 18px; color: #806c5a; margin-bottom: 8px; }
-.result-best { font-size: 16px; color: #e99595; font-weight: 700; margin-bottom: 20px; }
+
+/* チカチカ点滅アニメーション */
+.result-best {
+  font-size: 18px; color: #e99595; font-weight: 800; margin-bottom: 20px;
+  animation: blinkText 0.8s ease-in-out infinite alternate;
+}
+@keyframes blinkText {
+  0% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0.3; transform: scale(1.05); }
+}
 
 /* スコア画面 */
 .score-card { background: white; border-radius: 16px; padding: 16px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
@@ -177,9 +186,9 @@ body { display: flex; justify-content: center; align-items: center; }
     <div id="levelList" class="level-list"></div>
   </section>
 
-  <!-- レベル表紙画面 (Level_start.png) -->
+  <!-- レベル表紙画面 (level_start.png) -->
   <section id="coverScreen" class="cover-screen hidden">
-    <img src="Level_start.png" class="cover-img" alt="レベルスタート">
+    <img src="level_start.png" class="cover-img" alt="レベルスタート">
     <div id="coverLevelNumber" class="cover-level-number">1</div>
   </section>
 
@@ -365,7 +374,7 @@ function closeAdminModal() { document.getElementById("adminModal").classList.add
 /* ナビゲーション */
 function hideAllScreens() { document.querySelectorAll(".screen, .card-screen, .cover-screen").forEach(s => s.classList.add("hidden")); }
 function showSelectScreen() { hideAllScreens(); document.getElementById("selectScreen").classList.remove("hidden"); initProfiles(); }
-function showLevelScreen() { hideAllScreens(); document.getElementById("levelScreen").classList.remove("hidden"); }
+function showLevelScreen() { hideAllScreens(); document.getElementById("levelScreen").classList.remove("hidden"); createLevelButtons(); }
 
 function selectClef(clef) {
   if (!profiles[activeProfileIndex]) return openAdminModal();
@@ -390,13 +399,13 @@ function createLevelButtons() {
   }
 }
 
-/* レベル表紙画面表示 (Level_start.png) ➔ 自動移行 */
+/* レベル表紙画面表示 (level_start.png) ➔ 自動進行 */
 function showLevelCover(level) {
   selectedLevel = level; hideAllScreens();
   document.getElementById("coverLevelNumber").textContent = level;
   document.getElementById("coverScreen").classList.remove("hidden");
 
-  // 自動的に1.5秒でカード画面に進む
+  // タップなしで約1.5秒後に自動進行
   setTimeout(() => {
     if (!document.getElementById("coverScreen").classList.contains("hidden")) {
       proceedToCards();
@@ -450,6 +459,7 @@ function startTrainingConfirmed() {
   startTrainingWithConfig();
 }
 
+/* 直前の設定を保持したままトレーニング即スタート */
 function startTrainingWithConfig() {
   trainingMode = true; trainingQuestionCount = 0; trainingMistakes = 0;
   trainingStartTime = Date.now(); lastTrainingIndex = -1;
@@ -476,7 +486,7 @@ function restartTraining() {
   startTrainingWithConfig();
 }
 
-/* ノンリピート抽選（直前と同じ問題を続けて出さない） */
+/* 直前と同じ出題を避けるランダム選曲 */
 function showRandomTrainingQuestion() {
   if (trainingType === 'count' && trainingQuestionCount >= targetValue) {
     showResultScreen(); return;
@@ -506,20 +516,25 @@ function pressKey(key) {
     trainingLocked = true; trainingQuestionCount++;
     document.getElementById("trainingCover").classList.add("reveal");
     
-    // アニメーション＆音（毎回確実に再生）
     const circle = document.getElementById("correctCircle");
     circle.classList.remove("show"); void circle.offsetWidth; circle.classList.add("show");
     
+    // 正解音の連続再生安定化
     const audio = document.getElementById("seikaiAudio");
     audio.currentTime = 0; audio.play().catch(()=>{});
 
     setTimeout(() => { if (trainingMode) showRandomTrainingQuestion(); }, 1000);
     return;
   }
-  if (key === card.key) new Audio(card.sound).play().catch(()=>{});
+  
+  // 閲覧モード時のピアノ音再生（レベル5まとめでも正しく再生）
+  if (key === card.key) {
+    const audio = new Audio(card.sound);
+    audio.play().catch(()=>{});
+  }
 }
 
-/* リザルト・成績記録 */
+/* リザルト・成績即時セーブ処理 */
 function showResultScreen() {
   trainingMode = false;
   if (timeTimer) clearInterval(timeTimer);
@@ -530,7 +545,6 @@ function showResultScreen() {
   const total = trainingQuestionCount + trainingMistakes;
   const accuracy = total > 0 ? Math.round((trainingQuestionCount / total) * 100) : 0;
 
-  // 問題数開放ロジック
   if (trainingType === 'count' && targetValue === 10 && accuracy >= 90) {
     localStorage.setItem(`onpu_unlock_20_${activeProfileIndex}`, "true");
   }
@@ -538,7 +552,7 @@ function showResultScreen() {
     localStorage.setItem(`onpu_unlock_30_${activeProfileIndex}`, "true");
   }
 
-  // ベスト記録＆ファンファーレ（tassei-fanfare.mp3）
+  // ★画面表示の瞬間にクリア実績を即時セーブ！
   const bestKey = `onpu_best_${activeProfileIndex}_${selectedClef}_${selectedLevel}`;
   const savedBest = JSON.parse(localStorage.getItem(bestKey));
   let isNewRecord = false;
@@ -559,7 +573,7 @@ function showResultScreen() {
     fanfare.currentTime = 0; fanfare.play().catch(()=>{});
   } else { bestEl.textContent = ""; }
 
-  // 動的メッセージ & 次のレベルボタン制御
+  // 「次のレベルへ」進行ボタンおよびマスター文言（ヘ音記号不具合を完全修正）
   const msgEl = document.getElementById("resultMessage");
   const nextBtn = document.getElementById("nextLevelBtn");
   msgEl.textContent = "";
@@ -568,7 +582,7 @@ function showResultScreen() {
     if (selectedLevel < 5) {
       nextBtn.classList.remove("hidden");
     } else {
-      // レベル5マスター時
+      // レベル5クリア時
       const tBest5 = JSON.parse(localStorage.getItem(`onpu_best_${activeProfileIndex}_treble_5`));
       const bBest5 = JSON.parse(localStorage.getItem(`onpu_best_${activeProfileIndex}_bass_5`));
       const tCleared = tBest5 && tBest5.accuracy >= 90;
