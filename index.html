@@ -86,11 +86,19 @@ body { display: flex; justify-content: center; align-items: center; }
 .level-badge { background: #eadcc8; color: #5b4636; border-radius: 20px; padding: 5px 10px; font-size: 13px; font-weight: 700; }
 .training-btn { border: none; background: #eadcc8; color: #5b4636; border-radius: 20px; padding: 7px 11px; font-size: 13px; font-weight: 700; cursor: pointer; }
 
+/* カード表示エリア（ヘ音記号の低い音・加線が途切れないよう余白を設定） */
 .card-area {
   flex: 1; background: white; border-radius: 20px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;
+  padding: 16px 24px;
 }
 .note-card-wrap { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-.note-card-img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.note-card-img {
+  max-width: 100%;
+  max-height: 85%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
 .training-cover { position: absolute; width: 100%; height: 36%; left: 0; bottom: 0; background: white; transition: opacity 0.3s; }
 .training-cover.reveal { opacity: 0; }
 
@@ -121,11 +129,16 @@ body { display: flex; justify-content: center; align-items: center; }
 .arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 42px; height: 42px; border: none; border-radius: 50%; background: rgba(253,248,237,0.95); font-size: 28px; cursor: pointer; }
 .arrow-left { left: 8px; } .arrow-right { right: 8px; }
 
-/* 鍵盤 */
+/* 鍵盤デザイン */
 .keyboard { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; padding-top: 10px; }
 .key-btn { border: none; border-radius: 12px; min-height: 54px; color: white; font-size: 16px; font-weight: 700; cursor: pointer; position: relative; }
-.key-do { background: #e99595; } .key-re { background: #e6b26a; } .key-mi { background: #d6c45d; }
-.key-fa { background: #8dbb8d; } .key-so { background: #78a9c8; } .key-la { background: #9292c7; } .key-si { background: #b28bb9; }
+.key-do { background: #e99595; } 
+.key-re { background: #e6b26a; } 
+.key-mi { background: #d6c45d; }
+.key-fa { background: #8dbb8d; } /* 緑 */
+.key-so { background: #78a9c8; } 
+.key-la { background: #5a82d6; } /* ファと識別しやすいハッキリしたブルー */
+.key-si { background: #b28bb9; }
 
 /* モーダル */
 .modal-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: flex; justify-content: center; align-items: center; z-index: 100; }
@@ -343,15 +356,27 @@ body { display: flex; justify-content: center; align-items: center; }
 </div>
 
 <script>
-/* Web Audio APIで鳴らす合成音「ポコン」 */
+/* 共通AudioContext */
+let audioCtx = null;
+function getAudioContext() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+  return audioCtx;
+}
+
+/* 不正解時の「ポコン」効果音 */
 function playPokon() {
   try {
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
+    const ctx = getAudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
 
     osc.type = 'sine';
-    const now = audioCtx.currentTime;
+    const now = ctx.currentTime;
 
     osc.frequency.setValueAtTime(300, now);
     osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
@@ -361,40 +386,130 @@ function playPokon() {
     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
 
     osc.connect(gain);
-    gain.connect(audioCtx.destination);
+    gain.connect(ctx.destination);
 
     osc.start(now);
     osc.stop(now + 0.15);
   } catch (e) {
-    console.log("Audio API Error:", e);
+    console.log("Audio Error:", e);
   }
 }
 
-/* 6つの「ド」の定義（計6枚） */
+/* 各音符に対応する周波数（Hz）の対応表 */
+const noteFrequencies = {
+  "h_cdo": 65.41,  /* 超低いド (C2) */
+  "h_dre": 73.42,  /* レ */
+  "h_emi": 82.41,  /* ミ */
+  "h_ffa": 87.31,  /* ファ */
+  "h_gso": 98.00,  /* ソ */
+  "h_ara": 110.00, /* ラ */
+  "h_bsi": 123.47, /* シ */
+  "h_c00": 130.81, /* 低いド (C3) */
+  "h_d":   146.83,
+  "h_e":   164.81,
+  "h_f":   174.61,
+  "h_g":   196.00,
+  "h_a0":  220.00,
+  "h_b0":  246.94,
+  "h_c1":  261.63, /* 中央ド (C4) */
+  "h_d1":  293.66,
+  "h_e1":  329.63,
+  "h_f1":  349.23,
+
+  "t_e":   164.81,
+  "t_f":   174.61,
+  "t_g":   196.00,
+  "t_a":   220.00,
+  "t_b":   246.94,
+  "t_c1":  261.63, /* 中央ド (C4) */
+  "t_d1":  293.66,
+  "t_e1":  329.63,
+  "t_f1":  349.23,
+  "t_g1":  392.00,
+  "t_a1":  440.00, /* ラ */
+  "t_b1":  493.88,
+  "t_c2":  523.25, /* 高いド (C5) */
+  "t_d2":  587.33,
+  "t_e2":  659.25,
+  "t_f2":  698.46,
+  "t_g2":  783.99,
+  "t_a2":  880.00,
+  "t_b2":  987.77,
+  "t_c3":  1046.50,/* 超高いド (C6) */
+  "t_d3":  1174.66,
+  "t_e3":  1318.51
+};
+
+const defaultKeyFreqs = {
+  "ド": 261.63,
+  "レ": 293.66,
+  "ミ": 329.63,
+  "ファ": 349.23,
+  "ソ": 392.00,
+  "ラ": 440.00,
+  "シ": 493.88
+};
+
+/* リアルなピアノ和音音源の自動生成再生 */
+function playNoteSound(cardId, noteKey) {
+  try {
+    const ctx = getAudioContext();
+    const now = ctx.currentTime;
+    
+    const freq = noteFrequencies[cardId] || defaultKeyFreqs[noteKey] || 440;
+
+    const osc1 = ctx.createOscillator();
+    const osc2 = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc1.type = 'triangle';
+    osc1.frequency.setValueAtTime(freq, now);
+
+    osc2.type = 'sine';
+    osc2.frequency.setValueAtTime(freq * 2, now);
+
+    gain.gain.setValueAtTime(0.01, now);
+    gain.gain.linearRampToValueAtTime(0.4, now + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+
+    osc1.connect(gain);
+    osc2.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc1.start(now);
+    osc2.start(now);
+    osc1.stop(now + 1.2);
+    osc2.stop(now + 1.2);
+  } catch (e) {
+    console.log("Piano Sound Error:", e);
+  }
+}
+
+/* 6つの「ド」の定義 */
 const doCards = [
-  { id:"h_c1", key:"ド", img:"h_c1.png", sound:"h_c1.m4a" },   /* 真ん中のド (ヘ音) */
-  { id:"t_c1", key:"ド", img:"t_c1.png", sound:"t_c1.m4a" },   /* 真ん中のド (ト音) */
-  { id:"h_c00", key:"ド", img:"h_c00.png", sound:"h_c00.m4a" }, /* 低いド (ヘ音) */
-  { id:"h_cdo", key:"ド", img:"h_cdo.png", sound:"h_cdo.m4a" }, /* 超低いド (ヘ音) */
-  { id:"t_c2", key:"ド", img:"t_c2.png", sound:"t_c2.m4a" },   /* 高いド (ト音) */
-  { id:"t_c3", key:"ド", img:"t_c3.png", sound:"t_c3.m4a" }    /* 超高いド (ト音) */
+  { id:"h_c1", key:"ド", img:"h_c1.png" },
+  { id:"t_c1", key:"ド", img:"t_c1.png" },
+  { id:"h_c00", key:"ド", img:"h_c00.png" },
+  { id:"h_cdo", key:"ド", img:"h_cdo.png" },
+  { id:"t_c2", key:"ド", img:"t_c2.png" },
+  { id:"t_c3", key:"ド", img:"t_c3.png" }
 ];
 
 /* ト音記号カード */
 const trebleCards = {
-  1: [ { id:"t_c1", key:"ド", img:"t_c1.png", sound:"t_c1.m4a" }, { id:"t_d1", key:"レ", img:"t_d1.png", sound:"t_d1.m4a" }, { id:"t_e1", key:"ミ", img:"t_e1.png", sound:"t_e1.m4a" }, { id:"t_f1", key:"ファ", img:"t_f1.png", sound:"t_f1.m4a" }, { id:"t_g1", key:"ソ", img:"t_g1.png", sound:"t_g1.m4a" }, { id:"t_a1", key:"ラ", img:"t_a1.png", sound:"t_a1.m4a" }, { id:"t_b1", key:"シ", img:"t_b1.png", sound:"t_b1.m4a" }, { id:"t_c2", key:"ド", img:"t_c2.png", sound:"t_c2.m4a" } ],
-  2: [ { id:"t_c2", key:"ド", img:"t_c2.png", sound:"t_c2.m4a" }, { id:"t_d2", key:"レ", img:"t_d2.png", sound:"t_d2.m4a" }, { id:"t_e2", key:"ミ", img:"t_e2.png", sound:"t_e2.m4a" }, { id:"t_f2", key:"ファ", img:"t_f2.png", sound:"t_f2.m4a" }, { id:"t_g2", key:"ソ", img:"t_g2.png", sound:"t_g2.m4a" }, { id:"t_a2", key:"ラ", img:"t_a2.png", sound:"t_a2.m4a" }, { id:"t_b2", key:"シ", img:"t_b2.png", sound:"t_b2.m4a" }, { id:"t_c3", key:"ド", img:"t_c3.png", sound:"t_c3.m4a" } ],
-  3: [ { id:"t_c3", key:"ド", img:"t_c3.png", sound:"t_c3.m4a" }, { id:"t_d3", key:"レ", img:"t_d3.png", sound:"t_d3.m4a" }, { id:"t_e3", key:"ミ", img:"t_e3.png", sound:"t_e3.m4a" } ],
-  4: [ { id:"t_e", key:"ミ", img:"t_e.png", sound:"t_e.m4a" }, { id:"t_f", key:"ファ", img:"t_f.png", sound:"t_f.m4a" }, { id:"t_g", key:"ソ", img:"t_g.png", sound:"t_g.m4a" }, { id:"t_a", key:"ラ", img:"t_a.png", sound:"t_a.m4a" }, { id:"t_b", key:"シ", img:"t_b.png", sound:"t_b.m4a" }, { id:"t_c1", key:"ド", img:"t_c1.png", sound:"t_c1.m4a" }, { id:"t_d1", key:"レ", img:"t_d1.png", sound:"t_d1.m4a" }, { id:"t_e1", key:"ミ", img:"t_e1.png", sound:"t_e1.m4a" }, { id:"t_f1", key:"ファ", img:"t_f1.png", sound:"t_f1.m4a" } ]
+  1: [ { id:"t_c1", key:"ド", img:"t_c1.png" }, { id:"t_d1", key:"レ", img:"t_d1.png" }, { id:"t_e1", key:"ミ", img:"t_e1.png" }, { id:"t_f1", key:"ファ", img:"t_f1.png" }, { id:"t_g1", key:"ソ", img:"t_g1.png" }, { id:"t_a1", key:"ラ", img:"t_a1.png" }, { id:"t_b1", key:"シ", img:"t_b1.png" }, { id:"t_c2", key:"ド", img:"t_c2.png" } ],
+  2: [ { id:"t_c2", key:"ド", img:"t_c2.png" }, { id:"t_d2", key:"レ", img:"t_d2.png" }, { id:"t_e2", key:"ミ", img:"t_e2.png" }, { id:"t_f2", key:"ファ", img:"t_f2.png" }, { id:"t_g2", key:"ソ", img:"t_g2.png" }, { id:"t_a2", key:"ラ", img:"t_a2.png" }, { id:"t_b2", key:"シ", img:"t_b2.png" }, { id:"t_c3", key:"ド", img:"t_c3.png" } ],
+  3: [ { id:"t_c3", key:"ド", img:"t_c3.png" }, { id:"t_d3", key:"レ", img:"t_d3.png" }, { id:"t_e3", key:"ミ", img:"t_e3.png" } ],
+  4: [ { id:"t_e", key:"ミ", img:"t_e.png" }, { id:"t_f", key:"ファ", img:"t_f.png" }, { id:"t_g", key:"ソ", img:"t_g.png" }, { id:"t_a", key:"ラ", img:"t_a.png" }, { id:"t_b", key:"シ", img:"t_b.png" }, { id:"t_c1", key:"ド", img:"t_c1.png" }, { id:"t_d1", key:"レ", img:"t_d1.png" }, { id:"t_e1", key:"ミ", img:"t_e1.png" }, { id:"t_f1", key:"ファ", img:"t_f1.png" } ]
 };
 trebleCards[5] = [ ...trebleCards[1], ...trebleCards[2], ...trebleCards[3], ...trebleCards[4] ];
 
 /* ヘ音記号カード */
 const bassCards = {
-  1: [ { id:"h_c1", key:"ド", img:"h_c1.png", sound:"h_c1.m4a" }, { id:"h_b0", key:"シ", img:"h_b0.png", sound:"h_b0.m4a" }, { id:"h_a0", key:"ラ", img:"h_a0.png", sound:"h_a0.m4a" }, { id:"h_g", key:"ソ", img:"h_g.png", sound:"h_g.m4a" }, { id:"h_f", key:"ファ", img:"h_f.png", sound:"h_f.m4a" }, { id:"h_e", key:"ミ", img:"h_e.png", sound:"h_e.m4a" }, { id:"h_d", key:"レ", img:"h_d.png", sound:"h_d.m4a" }, { id:"h_c00", key:"ド", img:"h_c00.png", sound:"h_c00.m4a" } ],
-  2: [ { id:"h_c00", key:"ド", img:"h_c00.png", sound:"h_c00.m4a" }, { id:"h_bsi", key:"シ", img:"h_bsi.png", sound:"h_bsi.m4a" }, { id:"h_ara", key:"ラ", img:"h_ara.png", sound:"h_ara.m4a" }, { id:"h_gso", key:"ソ", img:"h_gso.png", sound:"h_gso.m4a" }, { id:"h_ffa", key:"ファ", img:"h_ffa.png", sound:"h_ffa.m4a" }, { id:"h_emi", key:"ミ", img:"h_emi.png", sound:"h_emi.m4a" }, { id:"h_dre", key:"レ", img:"h_dre.png", sound:"h_dre.m4a" }, { id:"h_cdo", key:"ド", img:"h_cdo.png", sound:"h_cdo.m4a" } ],
-  3: [ { id:"h_cdo", key:"ド", img:"h_cdo.png", sound:"h_cdo.m4a" }, { id:"h_bSi1", key:"シ", img:"h_bSi1.png", sound:"h_bSi1.m4a" }, { id:"h_aRa1", key:"ラ", img:"h_aRa1.png", sound:"h_aRa1.m4a" } ],
-  4: [ { id:"h_f1", key:"ファ", img:"h_f1.png", sound:"h_f1.m4a" }, { id:"h_e1", key:"ミ", img:"h_e1.png", sound:"h_e1.m4a" }, { id:"h_d1", key:"レ", img:"h_d1.png", sound:"h_d1.m4a" }, { id:"h_c1", key:"ド", img:"h_c1.png", sound:"h_c1.m4a" }, { id:"h_b0", key:"シ", img:"h_b0.png", sound:"h_b0.m4a" }, { id:"h_a0", key:"ラ", img:"h_a0.png", sound:"h_a0.m4a" }, { id:"h_g", key:"ソ", img:"h_g.png", sound:"h_g.m4a" }, { id:"h_f", key:"ファ", img:"h_f.png", sound:"h_f.m4a" }, { id:"h_e", key:"ミ", img:"h_e.png", sound:"h_e.m4a" } ]
+  1: [ { id:"h_c1", key:"ド", img:"h_c1.png" }, { id:"h_b0", key:"シ", img:"h_b0.png" }, { id:"h_a0", key:"ラ", img:"h_a0.png" }, { id:"h_g", key:"ソ", img:"h_g.png" }, { id:"h_f", key:"ファ", img:"h_f.png" }, { id:"h_e", key:"ミ", img:"h_e.png" }, { id:"h_d", key:"レ", img:"h_d.png" }, { id:"h_c00", key:"ド", img:"h_c00.png" } ],
+  2: [ { id:"h_c00", key:"ド", img:"h_c00.png" }, { id:"h_bsi", key:"シ", img:"h_bsi.png" }, { id:"h_ara", key:"ラ", img:"h_ara.png" }, { id:"h_gso", key:"ソ", img:"h_gso.png" }, { id:"h_ffa", key:"ファ", img:"h_ffa.png" }, { id:"h_emi", key:"ミ", img:"h_emi.png" }, { id:"h_dre", key:"レ", img:"h_dre.png" }, { id:"h_cdo", key:"ド", img:"h_cdo.png" } ],
+  3: [ { id:"h_cdo", key:"ド", img:"h_cdo.png" }, { id:"h_bSi1", key:"シ", img:"h_bSi1.png" }, { id:"h_aRa1", key:"ラ", img:"h_aRa1.png" } ],
+  4: [ { id:"h_f1", key:"ファ", img:"h_f1.png" }, { id:"h_e1", key:"ミ", img:"h_e1.png" }, { id:"h_d1", key:"レ", img:"h_d1.png" }, { id:"h_c1", key:"ド", img:"h_c1.png" }, { id:"h_b0", key:"シ", img:"h_b0.png" }, { id:"h_a0", key:"ラ", img:"h_a0.png" }, { id:"h_g", key:"ソ", img:"h_g.png" }, { id:"h_f", key:"ファ", img:"h_f.png" }, { id:"h_e", key:"ミ", img:"h_e.png" } ]
 };
 bassCards[5] = [ ...bassCards[1], ...bassCards[2], ...bassCards[3], ...bassCards[4] ];
 
@@ -446,7 +561,6 @@ function switchProfile(val) {
   initProfiles();
 }
 
-/* 「はじめに」モーダル制御 */
 function openIntroModal() { document.getElementById("introModal").classList.remove("hidden"); }
 function closeIntroModal() { document.getElementById("introModal").classList.add("hidden"); }
 
@@ -455,7 +569,6 @@ function startDoLessonFromIntro() {
   startDoLesson();
 }
 
-/* 「6つのド」レッスン開始 */
 function startDoLesson() {
   if (!profiles[activeProfileIndex]) return openAdminModal();
   selectedClef = "do";
@@ -470,7 +583,6 @@ function startDoLesson() {
   showCurrentCard();
 }
 
-/* 管理者モーダル */
 function openAdminModal() {
   document.getElementById("adminAuthSection").classList.remove("hidden");
   document.getElementById("adminEditSection").classList.add("hidden");
@@ -496,7 +608,6 @@ function saveProfile() {
 }
 function closeAdminModal() { document.getElementById("adminModal").classList.add("hidden"); }
 
-/* ナビゲーション */
 function hideAllScreens() { document.querySelectorAll(".screen, .card-screen, .cover-screen").forEach(s => s.classList.add("hidden")); }
 function showSelectScreen() { hideAllScreens(); document.getElementById("selectScreen").classList.remove("hidden"); initProfiles(); }
 function showLevelScreen() { hideAllScreens(); document.getElementById("levelScreen").classList.remove("hidden"); createLevelButtons(); }
@@ -568,7 +679,6 @@ function showCurrentCard() {
 function nextCard() { if (!trainingMode) { currentIndex = (currentIndex + 1) % currentCards.length; showCurrentCard(); } }
 function previousCard() { if (!trainingMode) { currentIndex = (currentIndex - 1 + currentCards.length) % currentCards.length; showCurrentCard(); } }
 
-/* トレーニング設定モーダル */
 function openTrainingSettings() {
   const unlock20 = localStorage.getItem(`onpu_unlock_20_${activeProfileIndex}`) === "true";
   const unlock30 = localStorage.getItem(`onpu_unlock_30_${activeProfileIndex}`) === "true";
@@ -641,10 +751,7 @@ function pressKey(key) {
     if (trainingLocked) return;
     if (key !== card.key) {
       trainingMistakes++;
-      
-      /* ポコン音を発声 */
       playPokon();
-      
       const xEl = document.getElementById("incorrectX");
       xEl.classList.remove("show"); void xEl.offsetWidth; xEl.classList.add("show");
       return;
@@ -652,6 +759,8 @@ function pressKey(key) {
     trainingLocked = true; trainingQuestionCount++;
     document.getElementById("trainingCover").classList.add("reveal");
     
+    playNoteSound(card.id, key);
+
     const circle = document.getElementById("correctCircle");
     circle.classList.remove("show"); void circle.offsetWidth; circle.classList.add("show");
     
@@ -663,12 +772,10 @@ function pressKey(key) {
   }
   
   if (key === card.key) {
-    const audio = new Audio(card.sound);
-    audio.play().catch(()=>{});
+    playNoteSound(card.id, key);
   }
 }
 
-/* リザルト画面 */
 function showResultScreen() {
   trainingMode = false;
   if (timeTimer) clearInterval(timeTimer);
@@ -697,7 +804,6 @@ function showResultScreen() {
 
   hideAllScreens();
 
-  // 現在のコース・レベルを表示用バッジに反映
   const badgeEl = document.getElementById("resultClefBadge");
   if (selectedClef === "do") {
     badgeEl.textContent = "🎵 6つの「ド」";
@@ -824,7 +930,6 @@ function showScoreScreen() {
   document.getElementById("scoreScreen").classList.remove("hidden");
 }
 
-/* 紙吹雪演出 */
 function startConfetti() {
   const canvas = document.getElementById("confettiCanvas");
   const ctx = canvas.getContext("2d");
