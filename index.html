@@ -2,10 +2,9 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Onpu Cards - Gamified Music Theory</title>
   <style>
-    /* 基本レイアウト・スタイリング */
     body {
       font-family: 'Helvetica Neue', Arial, sans-serif;
       background-color: #f7f5f0;
@@ -29,7 +28,6 @@
     }
     .hidden { display: none !important; }
     
-    /* ボタン装飾 */
     button {
       font-size: 16px;
       font-weight: bold;
@@ -42,9 +40,7 @@
       transition: background-color 0.2s, transform 0.1s;
     }
     button:active { transform: scale(0.98); }
-    button:disabled { opacity: 0.5; cursor: not-allowed; }
     
-    /* モーダル背景 */
     .modal-bg {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -60,18 +56,15 @@
       box-shadow: 0 6px 16px rgba(0,0,0,0.15);
     }
     .modal-title { font-weight: bold; margin-bottom: 12px; color: #5c4b37; }
-    
-    /* トレーニングモーダル内のオプション */
     .q-options { display: grid; gap: 8px; margin-bottom: 12px; }
     .q-btn { width: 100%; text-align: left; display: flex; justify-content: space-between; align-items: center; }
     .q-btn.selected { background-color: #8c7355; color: #fff; }
-    
     .modal-btn { width: 100%; margin-top: 8px; background-color: #8c7355; color: #fff; }
     .modal-btn.cancel { background-color: #e0d0c0; color: #5c4b37; }
 
     /* カード表示エリア */
     .card-display {
-      width: 100%; height: 220px;
+      width: 100%; height: 200px;
       border: 2px dashed #d8c8b8;
       border-radius: 12px;
       display: flex; justify-content: center; align-items: center;
@@ -80,32 +73,48 @@
     }
     .card-display img { max-width: 90%; max-height: 90%; object-fit: contain; }
 
-    /* 鍵盤コンテナ（kenbanzu.png を使用） */
-    .keyboard-container {
+    /* CSS描画の鍵盤コンテナ（1点ド〜2点ド：白鍵8本） */
+    .piano-keyboard {
       position: relative;
-      width: 100%;
-      max-width: 440px;
-      margin: 10px auto;
-    }
-    .keyboard-img {
-      width: 100%;
-      height: auto;
-      display: block;
-      border-radius: 8px;
-    }
-    /* 鍵盤の透明タップオーバーレイエリア */
-    .key-overlay {
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
       display: flex;
+      width: 100%;
+      height: 140px;
+      background: #333;
+      padding: 6px 4px 10px 4px;
+      border-radius: 12px;
+      box-sizing: border-box;
     }
-    /* 各鍵盤（1点ド〜2点ド、黒鍵対応）の領域調整 */
-    .touch-key {
-      position: absolute;
+    /* 白鍵 */
+    .white-key {
+      flex: 1;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 0 0 6px 6px;
+      margin: 0 1px;
       cursor: pointer;
-      background: rgba(255, 0, 0, 0.0); /* テスト時に 0.2 などにすると位置確認可能 */
-      border-radius: 0 0 4px 4px;
+      box-shadow: inset 0 -5px 0 #e0e0e0;
     }
+    .white-key:active { background: #eee; }
+
+    /* 黒鍵 */
+    .black-key {
+      position: absolute;
+      width: 8.5%;
+      height: 60%;
+      background: #222;
+      border-radius: 0 0 4px 4px;
+      z-index: 2;
+      cursor: pointer;
+      box-shadow: inset 0 -3px 0 #444;
+    }
+    .black-key:active { background: #444; }
+
+    /* 各黒鍵の配置位置 */
+    .bk-cs1 { left: 9.5%; }   /* ド♯ / レ♭ */
+    .bk-ds1 { left: 22.0%; }  /* レ♯ / ミ♭ */
+    .bk-fs1 { left: 47.0%; }  /* ファ♯ / ソ♭ */
+    .bk-gs1 { left: 59.5%; }  /* ソ♯ / ラ♭ */
+    .bk-as1 { left: 72.0%; }  /* ラ♯ / シ♭ */
   </style>
 </head>
 <body>
@@ -113,75 +122,63 @@
 <div class="container">
   <h2>Onpu Cards</h2>
 
-  <!-- メイン表示領域（おんぷカード） -->
   <div class="card-display">
     <img id="cardImage" src="" alt="おんぷカード" class="hidden">
     <div id="cardPlaceholder">カード読み込み中...</div>
   </div>
 
-  <!-- 操作・設定ボタン -->
   <div style="margin-bottom: 12px;">
     <button onclick="openTrainingSettings()">トレーニング設定</button>
   </div>
 
-  <!-- 鍵盤入力セクション（kenbanzu.png 使用） -->
-  <div class="keyboard-container">
-    <img src="kenbanzu.png" alt="鍵盤図" class="keyboard-img">
-    
-    <!-- 白鍵・黒鍵の個別タップエリア（1点ド〜2点ドの配置幅パーセンテージ） -->
-    <div class="key-overlay">
-      <!-- 白鍵 -->
-      <div class="touch-key" style="left: 0.0%;  width: 12.5%; height: 100%;" onclick="checkPianoKeyAnswer('key_c1')"></div> <!-- 1点ド -->
-      <div class="touch-key" style="left: 12.5%; width: 12.5%; height: 100%;" onclick="checkPianoKeyAnswer('key_d1')"></div> <!-- 1点レ -->
-      <div class="touch-key" style="left: 25.0%; width: 12.5%; height: 100%;" onclick="checkPianoKeyAnswer('key_e1')"></div> <!-- 1点ミ -->
-      <div class="touch-key" style="left: 37.5%; width: 12.5%; height: 100%;" onclick="checkPianoKeyAnswer('key_f1')"></div> <!-- 1点ファ -->
-      <div class="touch-key" style="left: 50.0%; width: 12.5%; height: 100%;" onclick="checkPianoKeyAnswer('key_g1')"></div> <!-- 1点ソ -->
-      <div class="touch-key" style="left: 62.5%; width: 12.5%; height: 100%;" onclick="checkPianoKeyAnswer('key_a1')"></div> <!-- 1点ラ -->
-      <div class="touch-key" style="left: 75.0%; width: 12.5%; height: 100%;" onclick="checkPianoKeyAnswer('key_b1')"></div> <!-- 1点シ -->
-      <div class="touch-key" style="left: 87.5%; width: 12.5%; height: 100%;" onclick="checkPianoKeyAnswer('key_c2')"></div> <!-- 2点ド -->
+  <!-- HTML/CSS描画によるインタラクティブ鍵盤 -->
+  <div class="piano-keyboard">
+    <!-- 白鍵 (8本) -->
+    <div class="white-key" onclick="checkPianoKeyAnswer('key_c1')"></div> <!-- 1点ド -->
+    <div class="white-key" onclick="checkPianoKeyAnswer('key_d1')"></div> <!-- 1点レ -->
+    <div class="white-key" onclick="checkPianoKeyAnswer('key_e1')"></div> <!-- 1点ミ -->
+    <div class="white-key" onclick="checkPianoKeyAnswer('key_f1')"></div> <!-- 1点ファ -->
+    <div class="white-key" onclick="checkPianoKeyAnswer('key_g1')"></div> <!-- 1点ソ -->
+    <div class="white-key" onclick="checkPianoKeyAnswer('key_a1')"></div> <!-- 1点ラ -->
+    <div class="white-key" onclick="checkPianoKeyAnswer('key_b1')"></div> <!-- 1点シ -->
+    <div class="white-key" onclick="checkPianoKeyAnswer('key_c2')"></div> <!-- 2点ド -->
 
-      <!-- 黒鍵 -->
-      <div class="touch-key" style="left: 8.0%;  width: 8.0%; height: 60%; z-index: 2;" onclick="checkPianoKeyAnswer('key_cs1')"></div> <!-- ド♯/レ♭ -->
-      <div class="touch-key" style="left: 20.5%; width: 8.0%; height: 60%; z-index: 2;" onclick="checkPianoKeyAnswer('key_ds1')"></div> <!-- レ♯/ミ♭ -->
-      <div class="touch-key" style="left: 45.5%; width: 8.0%; height: 60%; z-index: 2;" onclick="checkPianoKeyAnswer('key_fs1')"></div> <!-- ファ♯/ソ♭ -->
-      <div class="touch-key" style="left: 58.0%; width: 8.0%; height: 60%; z-index: 2;" onclick="checkPianoKeyAnswer('key_gs1')"></div> <!-- ソ♯/ラ♭ -->
-      <div class="touch-key" style="left: 70.5%; width: 8.0%; height: 60%; z-index: 2;" onclick="checkPianoKeyAnswer('key_as1')"></div> <!-- ラ♯/シ♭ -->
-    </div>
+    <!-- 黒鍵 (5本) -->
+    <div class="black-key bk-cs1" onclick="checkPianoKeyAnswer('key_cs1')"></div>
+    <div class="black-key bk-ds1" onclick="checkPianoKeyAnswer('key_ds1')"></div>
+    <div class="black-key bk-fs1" onclick="checkPianoKeyAnswer('key_fs1')"></div>
+    <div class="black-key bk-gs1" onclick="checkPianoKeyAnswer('key_gs1')"></div>
+    <div class="black-key bk-as1" onclick="checkPianoKeyAnswer('key_as1')"></div>
   </div>
 </div>
 
-<!-- トレーニング設定モーダル -->
+<!-- モーダル部分 -->
 <div id="trainingModal" class="modal-bg hidden">
   <div class="modal-box">
     <div class="modal-title">トレーニング設定</div>
-    
     <div style="font-size: 13px; color: #806c5a; margin-bottom: 6px; text-align: left;">問題数指定</div>
-    <div class="q-options" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="q-options">
       <button id="q10Btn" class="q-btn selected" onclick="selectMode('count', 10, this)">10問 <span id="markQ10"></span></button>
       <button id="q20Btn" class="q-btn" onclick="selectMode('count', 20, this)">20問 <span id="markQ20">🔒</span></button>
       <button id="q30Btn" class="q-btn" onclick="selectMode('count', 30, this)">30問 <span id="markQ30">🔒</span></button>
     </div>
-
     <div style="font-size: 13px; color: #806c5a; margin-bottom: 6px; text-align: left; margin-top: 10px;">タイムアタック</div>
-    <div class="q-options" style="grid-template-columns: repeat(1, 1fr);">
+    <div class="q-options">
       <button id="t30Btn" class="q-btn" onclick="selectMode('time', 30, this)">30秒 <span id="markT30"></span></button>
       <button id="t60Btn" class="q-btn" onclick="selectMode('time', 60, this)">60秒 <span id="markT60">🔒</span></button>
     </div>
-
     <button class="modal-btn" onclick="startTrainingConfirmed()">スタート！</button>
     <button class="modal-btn cancel" onclick="closeTrainingModal()">キャンセル</button>
   </div>
 </div>
 
 <script>
-  /* 1. 状態変数 ＆ プロファイル */
   let activeProfileIndex = 0;
-  let trainingType = 'count'; // 'count' または 'time'
+  let trainingType = 'count';
   let targetValue = 10;
   let currentQuestionIndex = 0;
   let correctAnswersCount = 0;
 
-  /* 2. Web Audio API (Pokon音合成) */
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   function playSynthesizedPokon() {
     if (audioCtx.state === 'suspended') { audioCtx.resume(); }
@@ -198,27 +195,27 @@
     osc.stop(audioCtx.currentTime + 0.08);
   }
 
-  /* 3. 1点ド〜2点ド（全♯/♭/♮）カード定義＆正解キーマッピング */
+  /* 1点ド〜2点ド（異音同名対応のマッピング） */
   const accidentalCards = [
-    // フラット (♭) - 理論的例外含む
-    { id: "t_cf1", name: "1点ド♭", img: "t_cf1.png", sound: "t_cf1.m4a", targetKey: "key_b0" },  // 鍵盤の位置: シ (低いシ)
-    { id: "t_df1", name: "1点レ♭", img: "t_df1.png", sound: "t_df1.m4a", targetKey: "key_cs1" }, // 黒鍵
-    { id: "t_ef1", name: "1点ミ♭", img: "t_ef1.png", sound: "t_ef1.m4a", targetKey: "key_ds1" }, // 黒鍵
-    { id: "t_ff1", name: "1点ファ♭", img: "t_ff1.png", sound: "t_ff1.m4a", targetKey: "key_e1" },  // 鍵盤の位置: ミ
-    { id: "t_gf1", name: "1点ソ♭", img: "t_gf1.png", sound: "t_gf1.m4a", targetKey: "key_fs1" }, // 黒鍵
-    { id: "t_af1", name: "1点ラ♭", img: "t_af1.png", sound: "t_af1.m4a", targetKey: "key_gs1" }, // 黒鍵
-    { id: "t_bf1", name: "1点シ♭", img: "t_bf1.png", sound: "t_bf1.m4a", targetKey: "key_as1" }, // 黒鍵
-    { id: "t_cf2", name: "2点ド♭", img: "t_cf2.png", sound: "t_cf2.m4a", targetKey: "key_b1" },  // 鍵盤の位置: 1点シ
+    // フラット (♭)
+    { id: "t_cf1", name: "1点ド♭", img: "t_cf1.png", sound: "t_cf1.m4a", targetKey: "key_b0" }, 
+    { id: "t_df1", name: "1点レ♭", img: "t_df1.png", sound: "t_df1.m4a", targetKey: "key_cs1" },
+    { id: "t_ef1", name: "1点ミ♭", img: "t_ef1.png", sound: "t_ef1.m4a", targetKey: "key_ds1" },
+    { id: "t_ff1", name: "1点ファ♭", img: "t_ff1.png", sound: "t_ff1.m4a", targetKey: "key_e1" },
+    { id: "t_gf1", name: "1点ソ♭", img: "t_gf1.png", sound: "t_gf1.m4a", targetKey: "key_fs1" },
+    { id: "t_af1", name: "1点ラ♭", img: "t_af1.png", sound: "t_af1.m4a", targetKey: "key_gs1" },
+    { id: "t_bf1", name: "1点シ♭", img: "t_bf1.png", sound: "t_bf1.m4a", targetKey: "key_as1" },
+    { id: "t_cf2", name: "2点ド♭", img: "t_cf2.png", sound: "t_cf2.m4a", targetKey: "key_b1" },
 
-    // シャープ (♯) - 理論的例外含む
-    { id: "t_cs1", name: "1点ド♯", img: "t_cs1.png", sound: "t_cs1.m4a", targetKey: "key_cs1" }, // 黒鍵
-    { id: "t_ds1", name: "1点レ♯", img: "t_ds1.png", sound: "t_ds1.m4a", targetKey: "key_ds1" }, // 黒鍵
-    { id: "t_es1", name: "1点ミ♯", img: "t_es1.png", sound: "t_es1.m4a", targetKey: "key_f1" },  // 鍵盤の位置: ファ
-    { id: "t_fs1", name: "1点ファ♯", img: "t_fs1.png", sound: "t_fs1.m4a", targetKey: "key_fs1" }, // 黒鍵
-    { id: "t_gs1", name: "1点ソ♯", img: "t_gs1.png", sound: "t_gs1.m4a", targetKey: "key_gs1" }, // 黒鍵
-    { id: "t_as1", name: "1点ラ♯", img: "t_as1.png", sound: "t_as1.m4a", targetKey: "key_as1" }, // 黒鍵
-    { id: "t_bs1", name: "1点シ♯", img: "t_bs1.png", sound: "t_bs1.m4a", targetKey: "key_c2" },  // 鍵盤の位置: 2点ド
-    { id: "t_cs2", name: "2点ド♯", img: "t_cs2.png", sound: "t_cs2.m4a", targetKey: "key_cs2" }, // 黒鍵 (2点ド♯)
+    // シャープ (♯)
+    { id: "t_cs1", name: "1点ド♯", img: "t_cs1.png", sound: "t_cs1.m4a", targetKey: "key_cs1" },
+    { id: "t_ds1", name: "1点レ♯", img: "t_ds1.png", sound: "t_ds1.m4a", targetKey: "key_ds1" },
+    { id: "t_es1", name: "1点ミ♯", img: "t_es1.png", sound: "t_es1.m4a", targetKey: "key_f1" },
+    { id: "t_fs1", name: "1点ファ♯", img: "t_fs1.png", sound: "t_fs1.m4a", targetKey: "key_fs1" },
+    { id: "t_gs1", name: "1点ソ♯", img: "t_gs1.png", sound: "t_gs1.m4a", targetKey: "key_gs1" },
+    { id: "t_as1", name: "1点ラ♯", img: "t_as1.png", sound: "t_as1.m4a", targetKey: "key_as1" },
+    { id: "t_bs1", name: "1点シ♯", img: "t_bs1.png", sound: "t_bs1.m4a", targetKey: "key_c2" },
+    { id: "t_cs2", name: "2点ド♯", img: "t_cs2.png", sound: "t_cs2.m4a", targetKey: "key_cs2" },
 
     // ナチュラル (♮)
     { id: "t_cn1", name: "1点ド♮", img: "t_cn1.png", sound: "t_cn1.m4a", targetKey: "key_c1" },
@@ -231,29 +228,21 @@
     { id: "t_cn2", name: "2点ド♮", img: "t_cn2.png", sound: "t_cn2.m4a", targetKey: "key_c2" }
   ];
 
-  /* 4. モーダル表示＆鍵アンロック処理 */
   function openTrainingSettings() {
     const q10Cleared = localStorage.getItem(`onpu_clear_q10_${activeProfileIndex}`) === "true";
     const q20Cleared = localStorage.getItem(`onpu_clear_q20_${activeProfileIndex}`) === "true";
     const q30Cleared = localStorage.getItem(`onpu_clear_q30_${activeProfileIndex}`) === "true";
-
     const t30Cleared = localStorage.getItem(`onpu_clear_t30_${activeProfileIndex}`) === "true";
     const t60Cleared = localStorage.getItem(`onpu_clear_t60_${activeProfileIndex}`) === "true";
 
     document.getElementById("markQ10").textContent = q10Cleared ? "✨クリア！" : "";
-
-    const q20Btn = document.getElementById("q20Btn");
-    q20Btn.disabled = !q10Cleared;
+    document.getElementById("q20Btn").disabled = !q10Cleared;
     document.getElementById("markQ20").textContent = q20Cleared ? "✨クリア！" : (q10Cleared ? "" : "🔒");
-
-    const q30Btn = document.getElementById("q30Btn");
-    q30Btn.disabled = !q20Cleared;
+    document.getElementById("q30Btn").disabled = !q20Cleared;
     document.getElementById("markQ30").textContent = q30Cleared ? "✨クリア！" : (q20Cleared ? "" : "🔒");
 
     document.getElementById("markT30").textContent = t30Cleared ? "✨クリア！" : "";
-
-    const t60Btn = document.getElementById("t60Btn");
-    t60Btn.disabled = !t30Cleared;
+    document.getElementById("t60Btn").disabled = !t30Cleared;
     document.getElementById("markT60").textContent = t60Cleared ? "✨クリア！" : (t30Cleared ? "" : "🔒");
 
     document.getElementById("trainingModal").classList.remove("hidden");
@@ -277,10 +266,9 @@
     loadQuestion();
   }
 
-  /* 5. 出題＆正解判定ロジック */
   function loadQuestion() {
     if (currentQuestionIndex >= accidentalCards.length) {
-      currentQuestionIndex = 0; // ループ
+      currentQuestionIndex = 0;
     }
     const card = accidentalCards[currentQuestionIndex];
     const imgEl = document.getElementById("cardImage");
@@ -294,7 +282,7 @@
     imgEl.onerror = () => {
       imgEl.classList.add("hidden");
       placeholder.classList.remove("hidden");
-      placeholder.textContent = `カード画像: ${card.name} (${card.img})`;
+      placeholder.textContent = `${card.name} (${card.img})`;
     };
   }
 
@@ -305,12 +293,8 @@
       correctAnswersCount++;
       currentQuestionIndex++;
       
-      // クリア判定＆アンロック記録
       checkAndSaveClearProgress();
-
-      setTimeout(loadQuestion, 200);
-    } else {
-      // 不正解時のフィードバック処理
+      loadQuestion();
     }
   }
 
@@ -332,7 +316,6 @@
     }
   }
 
-  // 初期化ロード
   window.onload = () => {
     loadQuestion();
   };
