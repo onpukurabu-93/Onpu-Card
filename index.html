@@ -94,30 +94,29 @@
       margin-bottom: 8px;
     }
 
-    /* ★カード表示エリア（下の文字・図を非表示にして楽譜を拡大する設定）★ */
+    /* ★縦長スマートフォンに最適化したカード表示エリア★ */
     .card-display {
       width: 100%; 
-      height: 220px; 
+      height: 360px; /* 縦幅を広げて五線譜全体を見やすく設定 */
       border: 2px dashed #d8c8b8;
       border-radius: 12px;
       display: flex; 
       justify-content: center; 
-      align-items: flex-start;
+      align-items: center;
       margin: 12px 0;
       background-color: #faf7f2;
-      overflow: hidden; /* 下にはみ出た文字を切る */
+      overflow: hidden;
     }
     .card-display img { 
-      width: 130%; /* 画像を拡大して音符を大きく */
-      height: auto; 
-      object-fit: cover; 
-      margin-top: -10px; /* 位置を中央に微調整 */
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain; /* 全体が収まるよう自動調整 */
     }
 
-    /* ★基本モード：ド〜シ（7個）横一列のボタン回答UI★ */
+    /* ド〜シ（7個）横一列のボタン回答UI */
     .button-answers {
       display: grid;
-      grid-template-columns: repeat(7, 1fr); /* 7個を均等配置 */
+      grid-template-columns: repeat(7, 1fr);
       gap: 4px;
       margin-top: 12px;
       width: 100%;
@@ -186,7 +185,6 @@
 <body>
 
 <div class="container">
-  <!-- 上部エリア：「はじめに」ボタンとプロフィール選択を復元 -->
   <div class="top-nav">
     <button onclick="openInstructionsModal()">📖 はじめに</button>
     <select id="profileSelect" class="profile-select" onchange="changeProfile(this.value)">
@@ -201,7 +199,7 @@
 
   <div class="card-display">
     <img id="cardImage" src="" alt="おんぷカード" class="hidden">
-    <div id="cardPlaceholder" style="margin-top: 80px;">カード読み込み中...</div>
+    <div id="cardPlaceholder">カード読み込み中...</div>
   </div>
 
   <div style="margin-bottom: 12px;">
@@ -238,7 +236,7 @@
   </div>
 </div>
 
-<!-- ★復元：はじめに モーダル★ -->
+<!-- はじめに モーダル -->
 <div id="instructionsModal" class="modal-bg hidden">
   <div class="modal-box">
     <div class="modal-title">📖 はじめに</div>
@@ -347,7 +345,6 @@
     { id: "t_cn2", name: "2点ド♮", img: "t_cn2.png", targetKey: "key_c2" }
   ];
 
-  /* はじめに モーダルの開閉 */
   function openInstructionsModal() {
     document.getElementById("instructionsModal").classList.remove("hidden");
   }
@@ -355,13 +352,11 @@
     document.getElementById("instructionsModal").classList.add("hidden");
   }
 
-  /* プレイヤー切り替え */
   function changeProfile(val) {
     activeProfileIndex = parseInt(val, 10);
     loadQuestion();
   }
 
-  /* トレーニング設定モーダル */
   function openTrainingSettings() {
     const q10Cleared = localStorage.getItem(`onpu_clear_q10_${activeProfileIndex}`) === "true";
     const q20Cleared = localStorage.getItem(`onpu_clear_q20_${activeProfileIndex}`) === "true";
