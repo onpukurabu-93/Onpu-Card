@@ -56,6 +56,7 @@
     .btn-secondary { background-color: #1abc9c; color: white; }
     .btn-admin { background-color: #7f8c8d; color: white; margin-top: 15px; }
 
+    /* カード画像表示領域 */
     .card-display-area {
       width: 100%;
       height: 52vh;
@@ -76,22 +77,27 @@
       object-fit: contain;
     }
 
+    /* レベル画面の雲イラスト */
     .cloud-container {
       position: relative;
-      width: 180px;
-      height: 110px;
+      width: 200px;
+      height: 130px;
       margin: 20px 0;
       display: flex;
       justify-content: center;
       align-items: center;
     }
-    .cloud-svg { width: 100%; height: 100%; filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.15)); }
+    .cloud-svg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0px 4px 8px rgba(0,0,0,0.15));
+    }
     .cloud-number {
       position: absolute;
-      top: 52%;
+      top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 3rem;
+      transform: translate(-50%, -45%);
+      font-size: 3.2rem;
       font-weight: 900;
       color: #e67e22;
       text-shadow: 2px 2px 0px #fff;
@@ -137,20 +143,20 @@
         </select>
       </div>
 
-      <!-- 10問スタートに固定 -->
       <button class="btn btn-primary" onclick="startCourse(10)">10問コース スタート</button>
       <button class="btn btn-secondary" onclick="startCourse(20)">20問コース スタート</button>
 
       <button class="btn btn-admin" onclick="openAdmin()">🔒 管理・設定（先生用）</button>
     </div>
 
-    <!-- 2. レベル表紙 -->
+    <!-- 2. レベル表紙（雲イラスト復元） -->
     <div id="screen-level-splash" class="screen">
       <h2 id="course-title-display">10問コース</h2>
       
       <div class="cloud-container">
-        <svg class="cloud-svg" viewBox="0 0 24 24" fill="#E0F7FA">
-          <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/>
+        <svg class="cloud-svg" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+          <path d="M 20 45 A 15 15 0 0 1 20 20 A 20 20 0 0 1 50 10 A 20 20 0 0 1 80 20 A 15 15 0 0 1 80 45 Z" fill="#81D4FA" />
+          <path d="M 15 48 A 12 12 0 0 1 15 25 A 18 18 0 0 1 45 15 A 18 18 0 0 1 75 25 A 12 12 0 0 1 75 48 Z" fill="#E0F7FA" />
         </svg>
         <div id="cloud-level-number" class="cloud-number">1</div>
       </div>
@@ -223,7 +229,7 @@
 
     const noteToPitch = { 'ド': 'C4', 'レ': 'D4', 'ミ': 'E4', 'ファ': 'F4', 'ソ': 'G4', 'ラ': 'A4', 'シ': 'B4' };
 
-    /* 先生のカード画像リスト構造（固定） */
+    /* カード画像リスト（以前の指定を完全維持） */
     const cardsData = [
       { name: 'ド', src: 'do.png' },
       { name: 'レ', src: 're.png' },
@@ -240,7 +246,6 @@
       pianoSynth.triggerAttackRelease(pitch, '8n');
     }
 
-    // 初期コースは10問でスタート
     let currentCourse = 10;
     let currentLevel = 1;
     let currentQuestionIndex = 0;
