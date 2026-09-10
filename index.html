@@ -78,7 +78,7 @@ body { display: flex; justify-content: center; align-items: center; }
   z-index: 10; pointer-events: none;
 }
 
-/* カード画面（余白を極限まで減らしてカードを拡大） */
+/* カード画面（余白を最小限にしてカード表示を拡大） */
 .card-screen { padding: 6px; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
 .card-header { display: flex; align-items: center; justify-content: space-between; padding: 4px 4px 6px; gap: 8px; }
 .card-back { border: none; background: transparent; color: #5b4636; font-size: 17px; cursor: pointer; }
@@ -86,7 +86,7 @@ body { display: flex; justify-content: center; align-items: center; }
 .level-badge { background: #eadcc8; color: #5b4636; border-radius: 20px; padding: 5px 10px; font-size: 13px; font-weight: 700; }
 .training-btn { border: none; background: #eadcc8; color: #5b4636; border-radius: 20px; padding: 7px 11px; font-size: 13px; font-weight: 700; cursor: pointer; }
 
-/* カード表示エリア：最大サイズに拡大 */
+/* カード表示エリア */
 .card-area {
   flex: 1; background: white; border-radius: 20px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;
   padding: 4px;
@@ -415,7 +415,7 @@ const defaultKeyFreqs = {
   "ド": 261.63, "レ": 293.66, "ミ": 329.63, "ファ": 349.23, "ソ": 392.00, "ラ": 440.00, "シ": 493.88
 };
 
-/* リアルなピアノ音の再生 */
+/* ピアノ音再生 */
 function playNoteSound(cardId, noteKey) {
   try {
     const ctx = getAudioContext();
@@ -475,9 +475,16 @@ const bassCards = {
 };
 bassCards[5] = [ ...bassCards[1], ...bassCards[2], ...bassCards[3], ...bassCards[4] ];
 
-const allCards = { 1: [ ...trebleCards[1] ], 2: [ ...trebleCards[4] ], 3: [ ...bassCards[2] ], 4: [ ...trebleCards[5] ], 5: [ ...trebleCards[5], ...bassCards[5] ] };
+/* 全カード（両手）のレベル定義：練習・トレーニング連動調整済 */
+const allCards = { 
+  1: [ ...trebleCards[1], ...bassCards[1] ],
+  2: [ ...trebleCards[2], ...bassCards[2] ],
+  3: [ ...trebleCards[3], ...bassCards[3] ],
+  4: [ ...trebleCards[4], ...bassCards[4] ],
+  5: [ ...trebleCards[5], ...bassCards[5] ]
+};
 
-/* 状態管理（初期プレイヤー：「くろ」「ちゃと」を追加） */
+/* 状態管理（3人登録対応） */
 let defaultProfiles = ["くろ", "ちゃと", ""];
 let profiles = JSON.parse(localStorage.getItem("onpu_profiles")) || defaultProfiles;
 let activeProfileIndex = parseInt(localStorage.getItem("onpu_active_profile")) || 0;
@@ -655,7 +662,6 @@ function showCurrentCard() {
 function nextCard() { if (!trainingMode) { currentIndex = (currentIndex + 1) % currentCards.length; showCurrentCard(); } }
 function previousCard() { if (!trainingMode) { currentIndex = (currentIndex - 1 + currentCards.length) % currentCards.length; showCurrentCard(); } }
 
-/* トレーニング設定（鍵開けロジック） */
 function openTrainingSettings() {
   const unlock20 = localStorage.getItem(`onpu_unlock_20_${activeProfileIndex}`) === "true";
   const unlock30 = localStorage.getItem(`onpu_unlock_30_${activeProfileIndex}`) === "true";
@@ -759,7 +765,6 @@ function pressKey(key) {
   }
 }
 
-/* リザルト画面・問題数制限と鍵解放・コース遷移制御 */
 function showResultScreen() {
   trainingMode = false;
   if (timeTimer) clearInterval(timeTimer);
@@ -770,7 +775,6 @@ function showResultScreen() {
   const total = trainingQuestionCount + trainingMistakes;
   const accuracy = total > 0 ? Math.round((trainingQuestionCount / total) * 100) : 0;
 
-  // 問題数設定の解放条件
   if (trainingType === 'count' && targetValue === 10 && accuracy >= 90) {
     localStorage.setItem(`onpu_unlock_20_${activeProfileIndex}`, "true");
   }
@@ -829,7 +833,6 @@ function showResultScreen() {
       nextBtn.textContent = "🚀 次のレベルへ挑戦！";
       nextBtn.classList.remove("hidden");
     } else {
-      /* レベル5のクリア時進行ロジック */
       const tBest5 = JSON.parse(localStorage.getItem(`onpu_best_${activeProfileIndex}_treble_5`));
       const bBest5 = JSON.parse(localStorage.getItem(`onpu_best_${activeProfileIndex}_bass_5`));
       const tCleared = tBest5 && tBest5.accuracy >= 90;
