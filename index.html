@@ -1,58 +1,513 @@
-<!-- 🔒 保護者専用メニュー画面 -->
-<div id="screenParent" class="screen hidden">
-  <div class="header">
-    <!-- トップへ戻る際も暗証番号を再要求しないスムーズな遷移 -->
-    <button class="btn btn-back" onclick="showScreen('screenTitle')">＜ トップへ戻る</button>
-    <div class="header-title">🔒 保護者専用メニュー</div>
-    <div></div>
-  </div>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>おんぷカード</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    body {
+      font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+      background-color: #f4f7f6;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 10px;
+    }
+    .container {
+      width: 100%;
+      max-width: 480px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 90vh;
+      position: relative;
+    }
+    .screen {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      padding: 16px;
+      width: 100%;
+    }
+    .hidden {
+      display: none !important;
+    }
+    
+    /* ボタン基本スタイル */
+    .btn {
+      background: #4A90E2;
+      color: #fff;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 25px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+      transition: background 0.2s, transform 0.1s;
+      margin-bottom: 10px;
+    }
+    .btn:active {
+      transform: scale(0.98);
+    }
+    .btn-outline {
+      background: #fff;
+      color: #4A90E2;
+      border: 2px solid #4A90E2;
+    }
+    .btn-back {
+      background: #9B9B9B;
+      padding: 6px 14px;
+      font-size: 14px;
+      border-radius: 15px;
+    }
 
-  <!-- ① 最上部に「対象プレイヤー切替」を配置 -->
-  <div class="parent-player-select-box" style="background: #eef5ff; padding: 12px; border-radius: 10px; margin-bottom: 15px; text-align: center;">
-    <label for="parentPlayerSelect" style="font-weight: bold; margin-right: 8px;">👤 対象プレイヤー：</label>
-    <select id="parentPlayerSelect" onchange="switchParentPlayer(this.value)" style="padding: 6px 12px; font-size: 15px; border-radius: 6px; border: 1px solid #4A90E2;">
-      <option value="0">ちゃたろう</option>
-      <option value="1">くろまる</option>
-      <option value="2">サブロー</option>
-    </select>
-  </div>
+    /* タイトル画面 */
+    .title-area {
+      text-align: center;
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
+    .main-title {
+      font-size: 28px;
+      color: #333;
+      font-weight: bold;
+    }
+    .main-subtitle {
+      font-size: 14px;
+      color: #666;
+      margin-top: 4px;
+    }
+    .player-select-box {
+      background: #f0f4f8;
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    .player-select-box select {
+      padding: 8px 12px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-left: 8px;
+    }
 
-  <!-- ② 選択されたプレイヤーの個別レポート（切替で連動） -->
-  <div class="report-card">
-    <div class="report-title">💡 今週の声かけヒント</div>
-    <div id="parentAdviceText" class="advice-box">
-      「タイムが縮んだね！」「毎日続けていてすごい！」など、結果だけでなく練習の「継続」を褒めてあげるとやる気がUPします。
+    /* ヘッダー */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .header-title {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    /* カード表示エリア */
+    .card-area {
+      position: relative;
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #fafafa;
+      border: 2px solid #eee;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      min-height: 220px;
+      overflow: hidden;
+    }
+    .note-card-wrap {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .note-card-img {
+      max-width: 90%;
+      max-height: 180px;
+      object-fit: contain;
+    }
+    .training-cover {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 45%;
+      background: #fff;
+      border-top: 2px dashed #ccc;
+    }
+    .correct-circle {
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      border: 8px solid #E74C3C;
+      border-radius: 50%;
+      display: none;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    /* 矢印ボタン */
+    .arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0,0,0,0.1);
+      border: none;
+      font-size: 24px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 5;
+    }
+    .arrow-left { left: 8px; }
+    .arrow-right { right: 8px; }
+
+    /* 鍵盤エリア */
+    .keyboard {
+      display: flex;
+      justify-content: space-between;
+      gap: 4px;
+      margin-bottom: 10px;
+    }
+    .key-btn {
+      flex: 1;
+      height: 60px;
+      background: #fff;
+      border: 2px solid #333;
+      border-radius: 0 0 6px 6px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 3px 0 #333;
+    }
+    .key-btn:active {
+      transform: translateY(3px);
+      box-shadow: none;
+    }
+
+    /* レポート・保護者画面用スタイル */
+    .report-card {
+      background: #f9f9f9;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    .report-title {
+      font-size: 15px;
+      font-weight: bold;
+      color: #4A90E2;
+      margin-bottom: 6px;
+    }
+    .advice-box {
+      background: #FFF8E1;
+      border-left: 4px solid #FFC107;
+      padding: 10px;
+      font-size: 13px;
+      border-radius: 0 8px 8px 0;
+    }
+    .certificate {
+      border: 4px double #D4AF37;
+      background: #FFFDF0;
+      padding: 16px;
+      text-align: center;
+      border-radius: 8px;
+    }
+    .certificate-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #D4AF37;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- 音源 -->
+  <audio id="sharedAudio" preload="auto"></audio> 
+  <audio id="correctAudio" preload="auto" src="seikai.mp3"></audio>
+
+  <!-- 1. トップ画面 -->
+  <div id="screenTitle" class="screen">
+    <div class="title-area">
+      <div class="main-title">おんぷカード</div>
+      <div class="main-subtitle">楽しく音符を覚えよう！</div>
+    </div>
+
+    <!-- プレイヤー切替（ちゃたろう, くろまる, サブロー） -->
+    <div class="player-select-box">
+      <label for="playerSelect">👤 プレイヤー:</label>
+      <select id="playerSelect" onchange="changeMainPlayer(this.value)">
+        <option value="0">ちゃたろう</option>
+        <option value="1">くろまる</option>
+        <option value="2">サブロー</option>
+      </select>
+    </div>
+
+    <button class="btn" onclick="selectClef('treble')">ト音記号</button>
+    <button class="btn" onclick="selectClef('bass')">ヘ音記号</button>
+    <button class="btn" onclick="selectClef('all')">全カード</button>
+    
+    <div style="margin-top: 15px; display: flex; gap: 8px;">
+      <button class="btn btn-outline" style="flex:1;" onclick="showScreen('screenRanking')">🏆 ランキング</button>
+      <button class="btn btn-outline" style="flex:1;" onclick="openParentMenu()">🔒 保護者メニュー</button>
     </div>
   </div>
 
-  <div class="report-card">
-    <div class="report-title">📅 今週の練習記録（スタンプ・日数）</div>
-    <div id="parentCalendarArea">
-      <!-- 選択されたプレイヤーの練習記録が反映されるエリア -->
+  <!-- 2. レベル選択画面 -->
+  <div id="screenLevel" class="screen hidden">
+    <div class="header">
+      <button class="btn btn-back" onclick="showScreen('screenTitle')">＜ 戻る</button>
+      <div class="header-title" id="levelTitle">レベル選択</div>
+      <div></div>
+    </div>
+    <div id="levelList"></div>
+  </div>
+
+  <!-- 3. カード表示・学習画面（通常・トレーニング） -->
+  <div id="screenCard" class="screen hidden">
+    <div class="header">
+      <button class="btn btn-back" onclick="showScreen('screenLevel')">＜ 戻る</button>
+      <div class="header-title" id="levelBadge">Lv.1</div>
+      <button id="trainingButton" class="btn" style="padding: 4px 12px; font-size: 13px;" onclick="startTraining()">トレーニング</button>
+    </div>
+
+    <div id="cardArea" class="card-area">
+      <button class="arrow arrow-left" onclick="previousCard()">‹</button>
+
+      <div class="note-card-wrap">
+        <img id="noteCardImg" class="note-card-img" src="" alt="音符カード">
+        <div id="trainingCover" class="training-cover hidden"></div>
+      </div>
+
+      <div id="correctCircle" class="correct-circle"></div>
+
+      <button class="arrow arrow-right" onclick="nextCard()">›</button>
+    </div>
+
+    <!-- 鍵盤エリア -->
+    <div class="keyboard">
+      <button class="key-btn" onclick="pressKey('ド', this)">ド</button>
+      <button class="key-btn" onclick="pressKey('レ', this)">レ</button>
+      <button class="key-btn" onclick="pressKey('ミ', this)">ミ</button>
+      <button class="key-btn" onclick="pressKey('ファ', this)">ファ</button>
+      <button class="key-btn" onclick="pressKey('ソ', this)">ソ</button>
+      <button class="key-btn" onclick="pressKey('ラ', this)">ラ</button>
+      <button class="key-btn" onclick="pressKey('シ', this)">シ</button>
     </div>
   </div>
 
-  <div class="report-card">
-    <div class="report-title">📈 得意・苦手音符レポート</div>
-    <div id="parentAnalysisReport">
-      <!-- 選択されたプレイヤーの苦手分析が反映されるエリア -->
+  <!-- 4. ランキング画面 -->
+  <div id="screenRanking" class="screen hidden">
+    <div class="header">
+      <button class="btn btn-back" onclick="showScreen('screenTitle')">＜ 戻る</button>
+      <div class="header-title">🏆 ランキング</div>
+      <div></div>
+    </div>
+    <div class="report-card">
+      <div class="report-title">全体TOP3 スコア</div>
+      <p style="font-size: 14px; margin-bottom: 4px;">🥇 1位: ちゃたろう - 12秒</p>
+      <p style="font-size: 14px; margin-bottom: 4px;">🥈 2位: くろまる - 15秒</p>
+      <p style="font-size: 14px;">🥉 3位: サブロー - 18秒</p>
+    </div>
+    <div class="report-card">
+      <div class="report-title">自分の順位</div>
+      <p id="myRankText" style="font-size: 14px;">現在の順位 (ちゃたろう): 1位</p>
     </div>
   </div>
 
-  <div class="report-card">
-    <div class="report-title">🏅 今月の努力賞</div>
-    <div class="certificate">
-      <div class="certificate-title">今月の努力賞</div>
-      <p id="certPlayerName" style="font-weight: bold; font-size: 16px;">ちゃたろう 殿</p>
-      <p style="font-size: 13px; color: #555; margin-top: 4px;">今月も練習に励みました！その素晴らしい努力を称えます。</p>
+  <!-- 5. 🔒 保護者専用メニュー（音符カード・鍵盤を完全除去） -->
+  <div id="screenParent" class="screen hidden">
+    <div class="header">
+      <button class="btn btn-back" onclick="showScreen('screenTitle')">＜ トップへ戻る</button>
+      <div class="header-title">🔒 保護者専用メニュー</div>
+      <div></div>
     </div>
-  </div>
 
-  <!-- ③ プレイヤー全員（1〜3）の記録を一括比較できるエリア -->
-  <div class="report-card" style="border-top: 2px solid #4A90E2; margin-top: 20px; padding-top: 15px;">
-    <div class="report-title">👨‍👩‍👧‍👦 プレイヤー成績比較（一括）</div>
-    <div id="parentSiblingComparison">
-      <!-- 全プレイヤーのタイム・正答率などの比較一覧データ -->
+    <!-- 最上部：対象プレイヤー切り替え -->
+    <div style="background: #eef5ff; padding: 12px; border-radius: 10px; margin-bottom: 15px; text-align: center;">
+      <label for="parentPlayerSelect" style="font-weight: bold; margin-right: 8px;">👤 対象プレイヤー：</label>
+      <select id="parentPlayerSelect" onchange="switchParentPlayer(this.value)" style="padding: 6px 12px; font-size: 15px; border-radius: 6px; border: 1px solid #4A90E2;">
+        <option value="0">ちゃたろう</option>
+        <option value="1">くろまる</option>
+        <option value="2">サブロー</option>
+      </select>
+    </div>
+
+    <!-- 個別レポート（切り替えで連動） -->
+    <div class="report-card">
+      <div class="report-title">💡 今週の声かけヒント</div>
+      <div class="advice-box">
+        「タイムが縮んだね！」「毎日続けていてすごい！」など、結果だけでなく練習の「継続」を褒めてあげるとやる気がUPします。
+      </div>
+    </div>
+
+    <div class="report-card">
+      <div class="report-title">📈 得意・苦手音符レポート</div>
+      <div id="parentReportText">
+        <p style="font-size: 13px; color: #27AE60;">◎ 得意: 「ド」「ミ」の読み取りは完璧です！</p>
+        <p style="font-size: 13px; color: #E74C3C; margin-top: 4px;">▲ 苦手: 「ファ」「ソ」で少し迷う傾向があります。</p>
+      </div>
+    </div>
+
+    <div class="report-card">
+      <div class="report-title">🏅 今月の努力賞</div>
+      <div class="certificate">
+        <div class="certificate-title">今月の努力賞</div>
+        <p id="certPlayerName" style="font-weight: bold; font-size: 16px;">ちゃたろう 殿</p>
+        <p style="font-size: 12px; color: #555; margin-top: 4px;">今月は累計 15日 練習に励みました！<br>その素晴らしい努力を称えます。</p>
+      </div>
+    </div>
+
+    <!-- きょうだい成績比較（一括比較） -->
+    <div class="report-card" style="border-top: 2px solid #4A90E2; margin-top: 15px; padding-top: 12px;">
+      <div class="report-title">👨‍👩‍👧‍👦 プレイヤー成績比較一覧</div>
+      <p style="font-size: 13px;">・ちゃたろう: ベスト 12秒 / 正答率 95%</p>
+      <p style="font-size: 13px; margin-top: 2px;">・くろまる: ベスト 15秒 / 正答率 90%</p>
+      <p style="font-size: 13px; margin-top: 2px;">・サブロー: ベスト 18秒 / 正答率 85%</p>
     </div>
   </div>
 </div>
+
+<script>
+  const playerNames = ["ちゃたろう", "くろまる", "サブロー"];
+  let currentScreen = 'screenTitle';
+  let currentPlayerIndex = 0;
+  let isTraining = false;
+  
+  // 認証保持フラグ（1度通ればアプリ起動中は再入力不要）
+  let isParentAuthenticated = false;
+
+  // 画面切替処理
+  function showScreen(screenId) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+    document.getElementById(screenId).classList.remove('hidden');
+    currentScreen = screenId;
+  }
+
+  // トップ画面でのプレイヤー切替
+  function changeMainPlayer(val) {
+    currentPlayerIndex = parseInt(val);
+    const name = playerNames[currentPlayerIndex];
+    document.getElementById('myRankText').innerText = `現在の順位 (${name}): ${currentPlayerIndex + 1}位`;
+    // 保護者画面のドロップダウンも同期
+    document.getElementById('parentPlayerSelect').value = val;
+    switchParentPlayer(val);
+  }
+
+  // 🔒 保護者専用メニューを開く処理（パスコード保持機能）
+  function openParentMenu() {
+    if (isParentAuthenticated) {
+      showScreen('screenParent');
+      return;
+    }
+
+    const pass = prompt("保護者専用暗証番号を入力してください (初期値: 0000):");
+    if (pass === "0000") {
+      isParentAuthenticated = true; // 認証を保持
+      showScreen('screenParent');
+    } else if (pass !== null) {
+      alert("暗証番号が正しくありません。");
+    }
+  }
+
+  // 保護者メニュー内でのプレイヤー切替
+  function switchParentPlayer(val) {
+    const idx = parseInt(val);
+    const selectedName = playerNames[idx];
+    
+    // 画面内テキストの連動更新
+    document.getElementById('certPlayerName').innerText = selectedName + " 殿";
+    
+    // プレイヤーごとの得意・苦手表示切替（例）
+    const reportElem = document.getElementById('parentReportText');
+    if (idx === 0) {
+      reportElem.innerHTML = '<p style="font-size: 13px; color: #27AE60;">◎ 得意: 「ド」「ミ」の読み取りは完璧です！</p><p style="font-size: 13px; color: #E74C3C; margin-top: 4px;">▲ 苦手: 「ファ」「ソ」で少し迷う傾向があります。</p>';
+    } else if (idx === 1) {
+      reportElem.innerHTML = '<p style="font-size: 13px; color: #27AE60;">◎ 得意: 「ソ」「ラ」の動きがスムーズです！</p><p style="font-size: 13px; color: #E74C3C; margin-top: 4px;">▲ 苦手: 低い「シ」の音で少し迷います。</p>';
+    } else {
+      reportElem.innerHTML = '<p style="font-size: 13px; color: #27AE60;">◎ 得意: 高い音のカードが得意です！</p><p style="font-size: 13px; color: #E74C3C; margin-top: 4px;">▲ 苦手: 「レ」と「ファ」の見分けを練習中。</p>';
+    }
+  }
+
+  // 音符選択・レベル選択
+  function selectClef(clef) {
+    const list = document.getElementById('levelList');
+    list.innerHTML = '';
+    for (let i = 1; i <= 3; i++) {
+      const btn = document.createElement('button');
+      btn.className = 'btn btn-outline';
+      btn.style.width = '100%';
+      btn.innerText = 'レベル ' + i;
+      btn.onclick = () => {
+        document.getElementById('levelBadge').innerText = 'Lv.' + i;
+        showScreen('screenCard');
+      };
+      list.appendChild(btn);
+    }
+    showScreen('screenLevel');
+  }
+
+  // トレーニング切り替え
+  function startTraining() {
+    isTraining = !isTraining;
+    const cover = document.getElementById('trainingCover');
+    const btn = document.getElementById('trainingButton');
+    if (isTraining) {
+      cover.classList.remove('hidden');
+      btn.innerText = "終了";
+      btn.style.background = "#E74C3C";
+    } else {
+      cover.classList.add('hidden');
+      btn.innerText = "トレーニング";
+      btn.style.background = "#4A90E2";
+    }
+  }
+
+  // 鍵盤クリック処理
+  function pressKey(note, btnElem) {
+    const circle = document.getElementById('correctCircle');
+    const correctAudio = document.getElementById('correctAudio');
+    
+    circle.style.display = 'block';
+    if(correctAudio) correctAudio.play().catch(()=>{});
+
+    if (isTraining) {
+      document.getElementById('trainingCover').classList.add('hidden');
+    }
+
+    setTimeout(() => {
+      circle.style.display = 'none';
+      if (isTraining) {
+        document.getElementById('trainingCover').classList.remove('hidden');
+      }
+    }, 800);
+  }
+
+  function previousCard() {}
+  function nextCard() {}
+</script>
+</body>
+</html>
+、
