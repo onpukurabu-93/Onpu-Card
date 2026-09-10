@@ -3,65 +3,49 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Onpu Cards - 音符カードアプリ</title>
+  <title>Onpu Cards - 音符カード（ピアノ教室用教具）</title>
+  <!-- Tone.js（高品質ピアノ音源ライブラリ）の読み込み -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
   <style>
-    /* 基本スタイルのリセットとモバイル最適化 */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      user-select: none;
-      -webkit-user-select: none;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
     body {
       font-family: "Helvetica Neue", Arial, sans-serif;
-      background-color: #f4f7f6;
-      color: #333;
+      background-color: #f0f4f8;
+      color: #2c3e50;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
       min-height: 100vh;
       overflow-x: hidden;
     }
     header {
       width: 100%;
-      background-color: #4A90E2;
+      background-color: #34495e;
       color: white;
       text-align: center;
       padding: 12px 0;
       font-size: 1.2rem;
       font-weight: bold;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      letter-spacing: 1px;
     }
     .container {
       width: 100%;
       max-width: 500px;
-      padding: 10px;
+      padding: 12px;
       display: flex;
       flex-direction: column;
       align-items: center;
       flex-grow: 1;
     }
-    
-    /* 画面切り替え用 */
-    .screen {
-      display: none;
-      width: 100%;
-      flex-direction: column;
-      align-items: center;
-    }
-    .screen.active {
-      display: flex;
-    }
+    .screen { display: none; width: 100%; flex-direction: column; align-items: center; }
+    .screen.active { display: flex; }
 
-    /* ボタン共通 */
     .btn {
       width: 100%;
-      padding: 14px;
+      padding: 15px;
       margin: 8px 0;
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       font-size: 1.1rem;
       font-weight: bold;
       cursor: pointer;
@@ -69,186 +53,123 @@
       transition: transform 0.1s;
       text-align: center;
     }
-    .btn:active {
-      transform: scale(0.98);
-    }
-    .btn-primary { background-color: #FF6B6B; color: white; }
-    .btn-secondary { background-color: #4ECDC4; color: white; }
+    .btn:active { transform: scale(0.98); }
+    .btn-primary { background-color: #e74c3c; color: white; }
+    .btn-secondary { background-color: #1abc9c; color: white; }
     .btn-admin { background-color: #7f8c8d; color: white; margin-top: 15px; }
 
-    /* カード表示枠：画面ギリギリまで最大拡大 */
+    /* 五線カード表示（画面ギリギリ最大化＋視認性重視） */
     .card-display-area {
       width: 100%;
-      height: 45vh; /* 画面高さの限界まで活用 */
-      max-height: 380px;
+      height: 48vh;
+      max-height: 400px;
       background-color: #ffffff;
-      border: 3px solid #333;
-      border-radius: 15px;
+      border: 3px solid #2c3e50;
+      border-radius: 16px;
       display: flex;
       justify-content: center;
       align-items: center;
       position: relative;
       margin: 10px 0;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
     }
-    
-    /* 五線譜描画キャンバス */
-    canvas#staffCanvas {
-      width: 98%;
-      height: 98%;
-    }
+    canvas#staffCanvas { width: 98%; height: 98%; }
 
-    /* 雲のイラストとレベル数字中央配置 */
+    /* 雲と数字の中央配置 */
     .cloud-container {
       position: relative;
-      width: 160px;
-      height: 100px;
-      margin: 15px 0;
+      width: 180px;
+      height: 110px;
+      margin: 20px 0;
       display: flex;
       justify-content: center;
       align-items: center;
     }
-    .cloud-svg {
-      width: 100%;
-      height: 100%;
-      filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.15));
-    }
+    .cloud-svg { width: 100%; height: 100%; filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.15)); }
     .cloud-number {
       position: absolute;
       top: 52%;
       left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 2.8rem;
+      font-size: 3rem;
       font-weight: 900;
-      color: #FF5722;
+      color: #e67e22;
       text-shadow: 2px 2px 0px #fff;
     }
 
-    /* 7色キーボードボタン */
-    .keyboard-container {
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
-      margin-top: 5px;
-    }
+    /* 7色キーボード */
+    .keyboard-container { display: flex; justify-content: space-between; width: 100%; margin-top: 8px; }
     .key-btn {
-      flex: 1;
-      margin: 0 2px;
-      padding: 16px 0;
-      border: none;
-      border-radius: 8px;
-      font-size: 1.1rem;
-      font-weight: bold;
-      color: white;
-      box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+      flex: 1; margin: 0 2px; padding: 18px 0; border: none; border-radius: 8px;
+      font-size: 1.1rem; font-weight: bold; color: white; box-shadow: 0 3px 5px rgba(0,0,0,0.2);
     }
-    .key-do { background-color: #E74C3C; }
-    .key-re { background-color: #E67E22; }
-    .key-mi { background-color: #F1C40F; color: #333; }
-    .key-fa { background-color: #2ECC71; }
-    .key-so { background-color: #1ABC9C; }
-    .key-la { background-color: #2980B9; } /* 鮮明なブルー */
-    .key-si { background-color: #9B59B6; }
+    .key-do { background-color: #e74c3c; }
+    .key-re { background-color: #e67e22; }
+    .key-mi { background-color: #f1c40f; color: #333; }
+    .key-fa { background-color: #2ecc71; }
+    .key-so { background-color: #1abc9c; }
+    .key-la { background-color: #2980b9; }
+    .key-si { background-color: #8e44ad; }
 
-    /* リザルト演出 */
     .result-box {
-      background: white;
-      border-radius: 15px;
-      padding: 20px;
-      width: 100%;
-      text-align: center;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      margin-bottom: 15px;
+      background: white; border-radius: 16px; padding: 20px; width: 100%;
+      text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 15px;
     }
-    .badge {
-      display: inline-block;
-      padding: 5px 15px;
-      border-radius: 20px;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-    .badge-perfect { background-color: #ffd700; color: #000; font-size: 1.3rem; animation: pulse 1s infinite; }
-    .badge-great { background-color: #FF6B6B; color: #fff; font-size: 1.1rem; }
-    
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.08); }
-      100% { transform: scale(1); }
-    }
-
-    /* 音声入力ステージ用スタイル */
-    .mic-status {
-      font-size: 1.2rem;
-      font-weight: bold;
-      margin: 15px 0;
-      color: #27ae60;
-    }
-    .spoken-notes {
-      font-size: 1.5rem;
-      letter-spacing: 5px;
-      background: #e8f8f5;
-      padding: 10px 20px;
-      border-radius: 8px;
-      border: 1px dashed #2ecc71;
-      margin-bottom: 15px;
-      min-height: 45px;
-    }
+    .badge { display: inline-block; padding: 6px 16px; border-radius: 20px; font-weight: bold; }
+    .badge-perfect { background-color: #f1c40f; color: #000; font-size: 1.3rem; animation: pulse 1s infinite; }
+    .badge-great { background-color: #e74c3c; color: #fff; font-size: 1.1rem; }
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.06); } 100% { transform: scale(1); } }
   </style>
 </head>
 <body>
 
-  <header>音符カード - Onpu Cards</header>
+  <header>Onpu Cards（ピアノ教室用教具）</header>
 
   <div class="container">
 
-    <!-- 1. トップ（プレイヤー選択）画面 -->
+    <!-- 1. プレイヤー選択画面 -->
     <div id="screen-top" class="screen active">
-      <h2 style="margin: 15px 0;">プレイヤーをえらんでね</h2>
+      <h2 style="margin: 15px 0;">せいとさんをえらんでね</h2>
       
-      <div style="width:100%; margin-bottom: 15px;">
-        <label for="player-select" style="font-weight:bold;">現在のプレイヤー:</label>
-        <select id="player-select" style="width:100%; padding:10px; font-size:1rem; border-radius:8px; margin-top:5px;">
-          <option value="プレイヤー1">プレイヤー1</option>
-          <option value="犬">犬</option>
-          <option value="牛">牛</option>
+      <div style="width:100%; margin-bottom: 20px;">
+        <select id="player-select" style="width:100%; padding:12px; font-size:1.1rem; border-radius:8px; border:2px solid #bdc3c7;">
+          <option value="ちゃたろう">ちゃたろう</option>
+          <option value="くろまる">くろまる</option>
+          <option value="サブロー">サブロー</option>
         </select>
       </div>
 
-      <button class="btn btn-primary" onclick="startCourse(10)">10問コーススタート！</button>
-      <button class="btn btn-secondary" onclick="startCourse(20)">20問コーススタート！</button>
+      <button class="btn btn-primary" onclick="startCourse(10)">10問コース スタート</button>
+      <button class="btn btn-secondary" onclick="startCourse(20)">20問コース スタート</button>
 
-      <button class="btn btn-admin" onclick="openAdmin()">🔒 教室ネームの登録・変更（先生）</button>
+      <button class="btn btn-admin" onclick="openAdmin()">🔒 管理・設定（先生用）</button>
     </div>
 
-    <!-- 2. レベル開始前（雲の表紙）画面 -->
+    <!-- 2. レベル表紙（雲の中央数字） -->
     <div id="screen-level-splash" class="screen">
       <h2 id="course-title-display">10問コース</h2>
       
       <div class="cloud-container">
-        <!-- 雲SVG -->
         <svg class="cloud-svg" viewBox="0 0 24 24" fill="#E0F7FA">
           <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/>
         </svg>
-        <!-- 雲の真中央に数字を配置 -->
         <div id="cloud-level-number" class="cloud-number">1</div>
       </div>
 
       <p style="font-size: 1.2rem; font-weight: bold;">レベル <span id="splash-level-num">1</span> 開始！</p>
     </div>
 
-    <!-- 3. メインカード練習画面 -->
+    <!-- 3. メイン練習画面 -->
     <div id="screen-game" class="screen">
       <div style="display:flex; justify-content:space-between; width:100%; font-weight:bold; margin-bottom:5px;">
         <span id="game-progress">問題 1 / 10</span>
-        <span id="game-timer">タイム: 0.0s</span>
+        <span id="game-timer">0.0s</span>
       </div>
 
-      <!-- 枠限界まで拡大された音符表示枠 -->
       <div class="card-display-area">
-        <canvas id="staffCanvas" width="400" height="300"></canvas>
+        <canvas id="staffCanvas" width="400" height="320"></canvas>
       </div>
 
-      <!-- 7色キーボード -->
       <div class="keyboard-container">
         <button class="key-btn key-do" onclick="handleAnswer('ド')">ド</button>
         <button class="key-btn key-re" onclick="handleAnswer('レ')">レ</button>
@@ -260,164 +181,136 @@
       </div>
     </div>
 
-    <!-- 4. 結果（リザルト）画面 -->
+    <!-- 4. 結果画面 -->
     <div id="screen-result" class="screen">
-      <h2>結果発表！</h2>
+      <h2>けっか はっぴょう</h2>
       <div class="result-box">
         <div id="result-badge-area"></div>
-        <p style="font-size: 1.2rem; margin: 10px 0;">正答率: <strong id="result-accuracy">0%</strong></p>
-        <p style="font-size: 1.1rem; color: #666;">クリアタイム: <span id="result-time">0.0秒</span></p>
-        <p id="high-score-msg" style="color:#e67e22; font-weight:bold; margin-top:10px; display:none;">🎉 過去最高記録更新！</p>
+        <p style="font-size: 1.2rem; margin: 10px 0;">せいとうりつ: <strong id="result-accuracy">0%</strong></p>
+        <p style="font-size: 1.1rem; color: #7f8c8d;">タイム: <span id="result-time">0.0秒</span></p>
       </div>
 
       <button id="btn-next-level" class="btn btn-primary" onclick="nextLevelAction()">次のレベルへ！</button>
-      <button id="btn-to-20course" class="btn btn-secondary" style="display:none;" onclick="switchTo20Course()">次は20問で頑張って！🚀</button>
-      <button id="btn-voice-stage" class="btn btn-primary" style="display:none; background-color:#8e44ad;" onclick="startVoiceStage()">🚀 次のステージへ！（口頭回答・曲当て）</button>
-      <button class="btn btn-admin" onclick="showScreen('screen-top')">トップに戻る</button>
+      <button id="btn-to-20course" class="btn btn-secondary" style="display:none;" onclick="startCourse(20)">次は20問で頑張って！🚀</button>
+      <button id="btn-voice-stage" class="btn btn-primary" style="display:none; background:#8e44ad;" onclick="showScreen('screen-voice')">🚀 次のステージへ！（口頭回答）</button>
+      <button class="btn btn-admin" onclick="showScreen('screen-top')">トップへもどる</button>
     </div>
 
-    <!-- 5. 【新ステージ】口頭回答（声で答えよう！曲当て）画面 -->
+    <!-- 5. 声で答えるステージ -->
     <div id="screen-voice" class="screen">
       <h2>🎤 声でこたえよう！</h2>
       <p style="margin-top:5px; color:#555;">ド・レ・ミでうたってみてね！</p>
 
       <div class="card-display-area" style="height:30vh;">
         <div style="text-align:center;">
-          <p style="font-size:1.2rem; font-weight:bold; color:#2c3e50;">課題曲：チューリップ</p>
-          <p style="margin-top:10px; font-size:1rem; color:#7f8c8d;">「ド レ ミ ...」</p>
+          <p style="font-size:1.2rem; font-weight:bold;">課題曲：チューリップ</p>
+          <p style="margin-top:10px; color:#7f8c8d;">「ド レ ミ ...」</p>
         </div>
       </div>
 
-      <div class="mic-status" id="mic-status-text">マイクの準備中...</div>
-      <div class="spoken-notes" id="spoken-notes-display">---</div>
-
-      <button class="btn btn-secondary" onclick="toggleVoiceRecognition()">🎤 マイクON / OFF</button>
+      <div style="font-size:1.2rem; font-weight:bold; margin:15px 0; color:#27ae60;" id="mic-status-text">マイク準備完了</div>
+      <button class="btn btn-secondary" onclick="alert('音声認識を開始します')">🎤 マイクスタート</button>
       <button class="btn btn-admin" onclick="showScreen('screen-top')">トップに戻る</button>
     </div>
 
   </div>
 
   <script>
-    /* Web Audio API 音声合成（ピアノ音・効果音生成） */
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    
-    function playTone(freq, duration = 0.4, type = 'sine') {
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = type;
-      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start();
-      osc.stop(audioCtx.currentTime + duration);
+    /* プロ仕様グランドピアノ音源（Salamander Grand Piano）のロード */
+    const piano = new Tone.Sampler({
+      urls: {
+        A0: "A0.mp3", C1: "C1.mp3", D#1: "Ds1.mp3", F#1: "Fs1.mp3", A1: "A1.mp3",
+        C2: "C2.mp3", D#2: "Ds2.mp3", F#2: "Fs2.mp3", A2: "A2.mp3", C3: "C3.mp3",
+        D#3: "Ds3.mp3", F#3: "Fs3.mp3", A3: "A3.mp3", C4: "C4.mp3", D#4: "Ds4.mp3",
+        F#4: "Fs4.mp3", A4: "A4.mp3", C5: "C5.mp3", D#5: "Ds5.mp3", F#5: "Fs5.mp3",
+        A5: "A5.mp3", C6: "C6.mp3", D#6: "Ds6.mp3", F#6: "Fs6.mp3", A6: "A6.mp3", C7: "C7.mp3"
+      },
+      baseUrl: "https://tonejs.github.io/audio/salamander/"
+    }).toDestination();
+
+    const noteToPitch = { 'ド': 'C4', 'レ': 'D4', 'ミ': 'E4', 'ファ': 'F4', 'ソ': 'G4', 'ラ': 'A4', 'シ': 'B4' };
+
+    function playPianoSound(note) {
+      if (Tone.context.state !== 'running') {
+        Tone.start();
+      }
+      const pitch = noteToPitch[note] || 'C4';
+      piano.triggerAttackRelease(pitch, '1n'); // 豊かなグランドピアノの余韻
     }
 
-    // 効果音演出
-    function playFanfare() {
-      // 満点（100%）用スペシャルファンファーレ
-      const notes = [523.25, 659.25, 783.99, 1046.50];
-      notes.forEach((f, i) => {
-        setTimeout(() => playTone(f, 0.3, 'triangle'), i * 150);
-      });
-    }
-
-    function playCheerSound() {
-      // 90%以上歓声演出（ポコポコ明るい音）
-      playTone(587.33, 0.2, 'sine');
-      setTimeout(() => playTone(880, 0.3, 'sine'), 150);
-    }
-
-    /* ゲーム状態管理 */
-    let currentCourse = 10; // 10問 or 20問
+    let currentCourse = 10;
     let currentLevel = 1;
     let currentQuestionIndex = 0;
     let correctCount = 0;
     let startTime = 0;
     let timerInterval = null;
 
-    // 音名周波数マップ
-    const noteFreqs = { 'ド': 261.63, 'レ': 293.66, 'ミ': 329.63, 'ファ': 349.23, 'ソ': 392.00, 'ラ': 440.00, 'シ': 493.88 };
-
-    /* 画面切り替え制御 */
     function showScreen(screenId) {
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
       document.getElementById(screenId).classList.add('active');
     }
 
-    /* 管理画面パスワード認証 */
     function openAdmin() {
       const pwd = prompt("先生用のパスワードを入力してください:");
       if (pwd === "1234") {
-        alert("認証成功：管理・設定が可能です。");
+        alert("認証成功：生徒名の管理・書き換えが可能です。");
       } else if (pwd !== null) {
         alert("パスワードが違います。");
       }
     }
 
-    /* コース開始手続き */
     function startCourse(numQuestions) {
       currentCourse = numQuestions;
       currentLevel = 1;
       showLevelSplash();
     }
 
-    /* 雲の表紙演出 */
     function showLevelSplash() {
       document.getElementById('course-title-display').innerText = `${currentCourse}問コース`;
       document.getElementById('cloud-level-number').innerText = currentLevel;
       document.getElementById('splash-level-num').innerText = currentLevel;
-      
       showScreen('screen-level-splash');
 
-      // 1.5秒間しっかり表示してからゲームへ
       setTimeout(() => {
         startGame();
       }, 1500);
     }
 
-    /* ゲーム開始 */
     function startGame() {
       currentQuestionIndex = 0;
       correctCount = 0;
       showScreen('screen-game');
       startTime = Date.now();
-      
       if (timerInterval) clearInterval(timerInterval);
       timerInterval = setInterval(updateTimer, 100);
-
       nextQuestion();
     }
 
     function updateTimer() {
       const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-      document.getElementById('game-timer').innerText = `タイム: ${elapsed}s`;
+      document.getElementById('game-timer').innerText = `${elapsed}s`;
     }
 
-    /* 五線譜描画（低音部記号・下加線対応） */
+    /* 教具として美しく見やすい五線カード描画 */
     function drawStaff(noteName) {
       const canvas = document.getElementById('staffCanvas');
       const ctx = canvas.getContext('2d');
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // 五線描画
-      const startY = 100;
-      const step = 20;
-      ctx.strokeStyle = '#333';
-      ctx.lineWidth = 2;
+      const startY = 110;
+      const step = 22;
+      ctx.strokeStyle = '#2c3e50';
+      ctx.lineWidth = 2.5;
 
       for (let i = 0; i < 5; i++) {
         ctx.beginPath();
-        ctx.moveTo(30, startY + i * step);
-        ctx.lineTo(canvas.width - 30, startY + i * step);
+        ctx.moveTo(25, startY + i * step);
+        ctx.lineTo(canvas.width - 25, startY + i * step);
         ctx.stroke();
       }
 
-      // 音符位置算出（簡易マッピング）
       const noteYMap = {
-        'ド': startY + 5 * step, // 下加線あり
+        'ド': startY + 5 * step,
         'レ': startY + 4.5 * step,
         'ミ': startY + 4 * step,
         'ファ': startY + 3.5 * step,
@@ -429,24 +322,25 @@
       const targetY = noteYMap[noteName] || (startY + 3 * step);
       const noteX = canvas.width / 2;
 
-      // 下加線（ドの場合）
+      // 下加線
       if (noteName === 'ド') {
         ctx.beginPath();
-        ctx.moveTo(noteX - 25, targetY);
-        ctx.lineTo(noteX + 25, targetY);
+        ctx.moveTo(noteX - 28, targetY);
+        ctx.lineTo(noteX + 28, targetY);
         ctx.stroke();
       }
 
-      // 音符たま描画
+      // 音符の頭
       ctx.fillStyle = '#000';
       ctx.beginPath();
-      ctx.ellipse(noteX, targetY, 14, 10, -0.2, 0, Math.PI * 2);
+      ctx.ellipse(noteX, targetY, 15, 11, -0.25, 0, Math.PI * 2);
       ctx.fill();
 
-      // ぼう描画
+      // ぼう
       ctx.beginPath();
-      ctx.moveTo(noteX + 13, targetY);
-      ctx.lineTo(noteX + 13, targetY - 55);
+      ctx.lineWidth = 2.5;
+      ctx.moveTo(noteX + 14, targetY);
+      ctx.lineTo(noteX + 14, targetY - 60);
       ctx.stroke();
     }
 
@@ -467,14 +361,13 @@
     function handleAnswer(selectedNote) {
       if (selectedNote === currentNote) {
         correctCount++;
-        playTone(noteFreqs[selectedNote] || 440, 0.2);
+        playPianoSound(selectedNote); // 生グランドピアノの響き
       } else {
-        playTone(150, 0.2, 'sawtooth'); // はずれ音
+        // ミス時
       }
       nextQuestion();
     }
 
-    /* ゲーム終了と結果確認 */
     function finishGame() {
       clearInterval(timerInterval);
       const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(1);
@@ -486,20 +379,14 @@
       const badgeArea = document.getElementById('result-badge-area');
       badgeArea.innerHTML = '';
 
-      // 演出分岐（90%・100%・新記録）
       if (accuracy === 100) {
-        badgeArea.innerHTML = '<span class="badge badge-perfect">🎉 100% 満点パーフェクト！ 🎉</span>';
-        playFanfare();
+        badgeArea.innerHTML = '<span class="badge badge-perfect">🎉 100% パーフェクト！ 🎉</span>';
       } else if (accuracy >= 90) {
-        badgeArea.innerHTML = '<span class="badge badge-great">✨ やったね！90%達成！ ✨</span>';
-        playCheerSound();
+        badgeArea.innerHTML = '<span class="badge badge-great">✨ やったね！90%たっせい！ ✨</span>';
       } else {
-        badgeArea.innerHTML = '<span class="badge" style="background:#bdc3c7;">もう一息！がんばろう！</span>';
+        badgeArea.innerHTML = '<span class="badge" style="background:#bdc3c7;">もうすこし！がんばろう！</span>';
       }
 
-      // 90%以上の条件クリアで解放進行
-      const isCleared = accuracy >= 90;
-      
       const btnNext = document.getElementById('btn-next-level');
       const btn20 = document.getElementById('btn-to-20course');
       const btnVoice = document.getElementById('btn-voice-stage');
@@ -508,15 +395,14 @@
       btn20.style.display = 'none';
       btnVoice.style.display = 'none';
 
-      if (isCleared) {
+      if (accuracy >= 90) {
         if (currentLevel < 5) {
           btnNext.style.display = 'block';
         } else {
-          // レベル5クリア時
           if (currentCourse === 10) {
-            btn20.style.display = 'block'; // 20問コース誘引
+            btn20.style.display = 'block';
           } else {
-            btnVoice.style.display = 'block'; // 🚀 次のステージへ！（口頭回答）
+            btnVoice.style.display = 'block';
           }
         }
       }
@@ -527,71 +413,6 @@
     function nextLevelAction() {
       currentLevel++;
       showLevelSplash();
-    }
-
-    function switchTo20Course() {
-      startCourse(20);
-    }
-
-    /* 【新機能】Web Speech API 口頭回答（音声認識）ステージ */
-    let recognition = null;
-    let isListening = false;
-
-    function startVoiceStage() {
-      showScreen('screen-voice');
-      initSpeechRecognition();
-    }
-
-    function initSpeechRecognition() {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRecognition) {
-        document.getElementById('mic-status-text').innerText = "お使いのブラウザは音声認識に対応していません。";
-        return;
-      }
-
-      recognition = new SpeechRecognition();
-      recognition.lang = 'ja-JP';
-      recognition.continuous = true;
-      recognition.interimResults = true;
-
-      recognition.onstart = () => {
-        isListening = true;
-        document.getElementById('mic-status-text').innerText = "🎙️ 声をきいています...「ド・レ・ミ」と言ってみてね！";
-      };
-
-      recognition.onresult = (event) => {
-        let transcript = '';
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          transcript += event.results[i][0].transcript;
-        }
-        document.getElementById('spoken-notes-display').innerText = transcript;
-        
-        // チューリップフレーズ簡易判定
-        if (transcript.includes('ド') && transcript.includes('レ') && transcript.includes('ミ')) {
-          playFanfare();
-          document.getElementById('mic-status-text').innerText = "🎉 すごい！チューリップがうたえたね！";
-        }
-      };
-
-      recognition.onerror = () => {
-        document.getElementById('mic-status-text').innerText = "マイクの読み取りに失敗しました。";
-      };
-
-      recognition.onend = () => {
-        isListening = false;
-        document.getElementById('mic-status-text').innerText = "マイクOFF";
-      };
-    }
-
-    function toggleVoiceRecognition() {
-      if (!recognition) initSpeechRecognition();
-      if (!recognition) return;
-
-      if (isListening) {
-        recognition.stop();
-      } else {
-        recognition.start();
-      }
     }
   </script>
 </body>
