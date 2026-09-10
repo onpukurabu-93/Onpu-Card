@@ -39,7 +39,7 @@ body { display: flex; justify-content: center; align-items: center; }
 .profile-label { font-size: 13px; color: #806c5a; margin-bottom: 6px; }
 .profile-current { font-size: 18px; font-weight: 700; color: #5b4636; margin-bottom: 10px; }
 .profile-select { width: 100%; padding: 8px; border-radius: 10px; border: 1px solid #eadcc8; font-size: 15px; color: #5b4636; background: #fdf8ed; margin-bottom: 8px; }
-.profile-edit-btn { background: transparent; border: none; color: #b28bb9; font-size: 13px; cursor: pointer; font-weight: 700; }
+.profile-edit-btn { background: transparent; border: none; color: #b28bb9; font-size: 13px; cursor: pointer; font-weight: 700; margin-top: 4px; }
 
 .select-button {
   width: 100%; border: none; border-radius: 18px; padding: 15px 12px; margin-bottom: 10px;
@@ -78,7 +78,7 @@ body { display: flex; justify-content: center; align-items: center; }
   z-index: 10; pointer-events: none;
 }
 
-/* カード画面（余白を最小限にしてカード表示を拡大） */
+/* カード画面 */
 .card-screen { padding: 6px; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
 .card-header { display: flex; align-items: center; justify-content: space-between; padding: 4px 4px 6px; gap: 8px; }
 .card-back { border: none; background: transparent; color: #5b4636; font-size: 17px; cursor: pointer; }
@@ -92,11 +92,7 @@ body { display: flex; justify-content: center; align-items: center; }
   padding: 4px;
 }
 .note-card-wrap { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-.note-card-img {
-  width: 98%;
-  height: 98%;
-  object-fit: contain;
-}
+.note-card-img { width: 98%; height: 98%; object-fit: contain; }
 .training-cover { position: absolute; width: 100%; height: 38%; left: 0; bottom: 0; background: white; transition: opacity 0.3s; }
 .training-cover.reveal { opacity: 0; }
 
@@ -168,10 +164,14 @@ body { display: flex; justify-content: center; align-items: center; }
   100% { opacity: 0.3; transform: scale(1.05); }
 }
 
-/* スコア画面 */
+/* スコア画面・兄弟比較テーブル */
 .score-card { background: white; border-radius: 16px; padding: 16px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
 .score-card-title { font-size: 16px; font-weight: 700; color: #5b4636; margin-bottom: 10px; border-bottom: 2px solid #fdf8ed; padding-bottom: 6px; }
 .score-row { display: flex; justify-content: space-between; font-size: 14px; color: #806c5a; margin-bottom: 6px; }
+
+.compare-table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: center; margin-top: 8px; }
+.compare-table th, .compare-table td { border: 1px solid #eadcc8; padding: 6px 4px; color: #5b4636; }
+.compare-table th { background: #fdf8ed; font-weight: 700; }
 
 #confettiCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; }
 </style>
@@ -194,14 +194,14 @@ body { display: flex; justify-content: center; align-items: center; }
       <select id="profileSelect" class="profile-select" onchange="switchProfile(this.value)">
         <option value="">-- プレイヤーを選択 --</option>
       </select>
-      <button class="profile-edit-btn" onclick="openAdminModal()">🔒 教室ネームの登録・変更（先生）</button>
+      <button class="profile-edit-btn" onclick="openAdminAuthModal('register')">🔒 プレイヤー登録・保護者設定</button>
     </div>
 
     <!-- はじめに / 6つのド -->
     <button class="select-button info" onclick="openIntroModal()">📖 はじめに（つかいかた）</button>
     <button class="select-button special" onclick="startDoLesson()">🎵 6つの「ド」をおぼえよう！</button>
     
-    <button class="select-button accent" onclick="showScoreScreen()">🏆 せいせき・ランキングをみる</button>
+    <button class="select-button accent" onclick="openAdminAuthModal('score')">🏆 兄弟せいせき・ランキング</button>
 
     <button id="btnTreble" class="select-button" onclick="selectClef('treble')">
       ト音記号 <span id="lockTreble" class="lock-tag">🔒 6つのドクリアで解放</span>
@@ -230,11 +230,11 @@ body { display: flex; justify-content: center; align-items: center; }
     <div id="coverLevelNumber" class="cover-level-number">1</div>
   </section>
 
-  <!-- 成績確認画面 -->
+  <!-- 兄弟成績・比較画面 -->
   <section id="scoreScreen" class="screen hidden">
     <div class="header">
       <button class="back-btn" onclick="showSelectScreen()">＜ 戻る</button>
-      <div class="header-title">せいせき</div>
+      <div class="header-title">兄弟せいせき比較</div>
       <div class="header-spacer"></div>
     </div>
     <div id="scoreContent"></div>
@@ -285,7 +285,6 @@ body { display: flex; justify-content: center; align-items: center; }
       <div class="result-detail" id="resultTime">タイム: 0.0秒</div>
       <div class="result-best" id="resultBest">✨ 過去最高記録更新！</div>
       
-      <!-- 次のステージへ進むボタン -->
       <button id="nextLevelBtn" class="select-button accent hidden" onclick="goToNextLevel()">🚀 次のステージへ！</button>
       <button class="select-button" onclick="restartTraining()">もう一度挑戦する</button>
       <button class="select-button" onclick="showSelectScreen()">トップへ戻る</button>
@@ -313,29 +312,32 @@ body { display: flex; justify-content: center; align-items: center; }
   </div>
 </div>
 
-<!-- 管理者認証モーダル -->
+<!-- 保護者認証・設定モーダル -->
 <div id="adminModal" class="modal-bg hidden">
   <div class="modal-box">
-    <div class="modal-title">管理者（先生）設定</div>
+    <div class="modal-title">🔒 保護者認証</div>
     <div id="adminAuthSection">
-      <input type="password" id="adminPassInput" class="modal-input" placeholder="パスワード (1234)">
+      <div style="font-size: 13px; color: #806c5a; margin-bottom: 8px;">暗証番号を入力してください（初期設定: 0000）</div>
+      <input type="password" id="adminPassInput" class="modal-input" maxlength="4" placeholder="0000">
       <button class="modal-btn" onclick="verifyAdminPass()">認証</button>
       <button class="modal-btn cancel" onclick="closeAdminModal()">キャンセル</button>
     </div>
     <div id="adminEditSection" class="hidden">
+      <div style="font-size:14px; font-weight:700; color:#5b4636; margin-bottom:8px;">【プレイヤー登録】</div>
       <select id="slotSelect" class="modal-input" onchange="onAdminSlotChange(this.value)">
-        <option value="0">プレイヤー 1 (くろ)</option>
-        <option value="1">プレイヤー 2 (ちゃと)</option>
+        <option value="0">プレイヤー 1</option>
+        <option value="1">プレイヤー 2</option>
         <option value="2">プレイヤー 3</option>
       </select>
       <input type="text" id="profileInputName" class="modal-input" placeholder="名前を入力">
       
-      <div style="text-align:left; margin: 10px 0; font-size:14px; color:#5b4636;">
-        <label><input type="checkbox" id="profileCheckSibling"> 兄弟順位（出席・順番管理用）</label>
-      </div>
+      <button class="modal-btn" onclick="saveProfile()" style="margin-bottom: 15px;">プレイヤー情報を保存</button>
 
-      <button class="modal-btn" onclick="saveProfile()">保存する</button>
-      <button class="modal-btn cancel" onclick="closeAdminModal()">閉じる</button>
+      <div style="border-top: 1px solid #eadcc8; padding-top: 12px; font-size:14px; font-weight:700; color:#5b4636; margin-bottom:8px;">【保護者暗証番号の変更】</div>
+      <input type="password" id="newPassInput" class="modal-input" maxlength="4" placeholder="新しい4桁の暗証番号">
+      <button class="modal-btn info" onclick="changeParentPassword()">暗証番号を変更する</button>
+
+      <button class="modal-btn cancel" onclick="closeAdminModal()" style="margin-top: 15px;">閉じる</button>
     </div>
   </div>
 </div>
@@ -475,7 +477,6 @@ const bassCards = {
 };
 bassCards[5] = [ ...bassCards[1], ...bassCards[2], ...bassCards[3], ...bassCards[4] ];
 
-/* 全カード（両手）のレベル定義：練習・トレーニング連動調整済 */
 const allCards = { 
   1: [ ...trebleCards[1], ...bassCards[1] ],
   2: [ ...trebleCards[2], ...bassCards[2] ],
@@ -484,10 +485,12 @@ const allCards = {
   5: [ ...trebleCards[5], ...bassCards[5] ]
 };
 
-/* 状態管理（3人登録対応） */
-let defaultProfiles = ["くろ", "ちゃと", ""];
+/* 状態管理 */
+let defaultProfiles = ["", "", ""];
 let profiles = JSON.parse(localStorage.getItem("onpu_profiles")) || defaultProfiles;
 let activeProfileIndex = parseInt(localStorage.getItem("onpu_active_profile")) || 0;
+let parentPass = localStorage.getItem("onpu_parent_pass") || "0000";
+let pendingAuthPurpose = "register"; // "register" or "score"
 
 let selectedClef = null, selectedLevel = null, currentCards = [];
 let currentIndex = 0, trainingMode = false, trainingLocked = false, lastTrainingIndex = -1;
@@ -499,19 +502,33 @@ let nextActionClef = null, nextActionLevel = 1;
 function initProfiles() {
   const select = document.getElementById("profileSelect");
   select.innerHTML = '<option value="">-- プレイヤーを選択 --</option>';
+  let validCount = 0;
   profiles.forEach((name, idx) => {
     if (name) {
+      validCount++;
       const opt = document.createElement("option");
       opt.value = idx; opt.textContent = `プレイヤー ${idx+1}: ${name}`;
       if (idx === activeProfileIndex) opt.selected = true;
       select.appendChild(opt);
     }
   });
-  document.getElementById("currentProfileName").textContent = profiles[activeProfileIndex] || "未登録（先生画面から登録）";
+  
+  if (profiles[activeProfileIndex]) {
+    document.getElementById("currentProfileName").textContent = profiles[activeProfileIndex];
+  } else {
+    document.getElementById("currentProfileName").textContent = "未選択（保護者設定から登録）";
+  }
+
   checkDoLockStatus();
 }
 
 function checkDoLockStatus() {
+  if (!profiles[activeProfileIndex]) {
+    document.getElementById("btnTreble").disabled = true;
+    document.getElementById("btnBass").disabled = true;
+    document.getElementById("btnAll").disabled = true;
+    return;
+  }
   const doBest = JSON.parse(localStorage.getItem(`onpu_best_${activeProfileIndex}_do_0`));
   const isUnlocked = doBest && doBest.accuracy >= 90;
 
@@ -540,7 +557,7 @@ function startDoLessonFromIntro() {
 }
 
 function startDoLesson() {
-  if (!profiles[activeProfileIndex]) return openAdminModal();
+  if (!profiles[activeProfileIndex]) return openAdminAuthModal('register');
   selectedClef = "do"; selectedLevel = 0;
   currentCards = doCards; currentIndex = 0; trainingMode = false;
   
@@ -550,7 +567,8 @@ function startDoLesson() {
   showCurrentCard();
 }
 
-function openAdminModal() {
+function openAdminAuthModal(purpose) {
+  pendingAuthPurpose = purpose;
   document.getElementById("adminAuthSection").classList.remove("hidden");
   document.getElementById("adminEditSection").classList.add("hidden");
   document.getElementById("adminPassInput").value = "";
@@ -558,34 +576,51 @@ function openAdminModal() {
 }
 
 function verifyAdminPass() {
-  if (document.getElementById("adminPassInput").value === "1234") {
-    document.getElementById("adminAuthSection").classList.add("hidden");
-    document.getElementById("adminEditSection").classList.remove("hidden");
-    document.getElementById("slotSelect").value = activeProfileIndex;
-    onAdminSlotChange(activeProfileIndex);
-  } else { alert("パスワードが違います"); }
+  const inputPass = document.getElementById("adminPassInput").value;
+  if (inputPass === parentPass) {
+    if (pendingAuthPurpose === 'score') {
+      closeAdminModal();
+      showScoreScreen();
+    } else {
+      document.getElementById("adminAuthSection").classList.add("hidden");
+      document.getElementById("adminEditSection").classList.remove("hidden");
+      document.getElementById("slotSelect").value = activeProfileIndex;
+      onAdminSlotChange(activeProfileIndex);
+    }
+  } else { 
+    alert("暗証番号が違います"); 
+  }
+}
+
+function changeParentPassword() {
+  const newPass = document.getElementById("newPassInput").value.trim();
+  if (newPass.length !== 4 || isNaN(newPass)) {
+    return alert("4桁の数字を入力してください");
+  }
+  parentPass = newPass;
+  localStorage.setItem("onpu_parent_pass", parentPass);
+  alert("暗証番号を変更しました！");
+  document.getElementById("newPassInput").value = "";
 }
 
 function onAdminSlotChange(slotVal) {
   const slot = parseInt(slotVal);
   document.getElementById("profileInputName").value = profiles[slot] || "";
-  const isSibling = localStorage.getItem(`onpu_sibling_${slot}`) === "true";
-  document.getElementById("profileCheckSibling").checked = isSibling;
 }
 
 function saveProfile() {
   const slot = parseInt(document.getElementById("slotSelect").value);
   const name = document.getElementById("profileInputName").value.trim();
-  const isSibling = document.getElementById("profileCheckSibling").checked;
 
-  if (!name) return alert("名前を入力してください");
   profiles[slot] = name; 
-  activeProfileIndex = slot;
+  if (name && (!profiles[activeProfileIndex] || activeProfileIndex === slot)) {
+    activeProfileIndex = slot;
+  }
   
   localStorage.setItem("onpu_profiles", JSON.stringify(profiles));
   localStorage.setItem("onpu_active_profile", activeProfileIndex);
-  localStorage.setItem(`onpu_sibling_${slot}`, isSibling ? "true" : "false");
 
+  alert("プレイヤー情報を更新しました");
   closeAdminModal(); initProfiles();
 }
 
@@ -604,7 +639,7 @@ function handleCardBack() {
 }
 
 function selectClef(clef) {
-  if (!profiles[activeProfileIndex]) return openAdminModal();
+  if (!profiles[activeProfileIndex]) return openAdminAuthModal('register');
   selectedClef = clef; hideAllScreens();
   document.getElementById("levelScreen").classList.remove("hidden");
   createLevelButtons();
@@ -900,25 +935,64 @@ function recordPracticeStats(durationSec) {
 function showScoreScreen() {
   hideAllScreens();
   const container = document.getElementById("scoreContent");
-  const activeName = profiles[activeProfileIndex] || "未選択";
-  const days = JSON.parse(localStorage.getItem(`onpu_days_${activeProfileIndex}`)) || [];
-  const totalSec = parseInt(localStorage.getItem(`onpu_time_${activeProfileIndex}`)) || 0;
-  const isSibling = localStorage.getItem(`onpu_sibling_${activeProfileIndex}`) === "true";
   
-  const mins = Math.floor(totalSec / 60);
-  const secs = totalSec % 60;
+  let html = `<div class="score-card"><div class="score-card-title">👨‍👩‍👧‍👦 兄弟・プレイヤー成績比較表</div>`;
+  
+  let registeredProfiles = profiles.map((name, idx) => ({ name, idx })).filter(p => p.name !== "");
 
-  const doBest = JSON.parse(localStorage.getItem(`onpu_best_${activeProfileIndex}_do_0`));
-  const doScoreText = doBest ? `${doBest.accuracy}%` : "未挑戦";
+  if (registeredProfiles.length === 0) {
+    html += `<div style="text-align:center; color:#806c5a; padding: 10px;">登録済みのプレイヤーがいません。<br>保護者設定から登録してください。</div></div>`;
+  } else {
+    html += `<table class="compare-table">
+      <thead>
+        <tr>
+          <th>名前</th>
+          <th>日数</th>
+          <th>時間</th>
+          <th>6つのド</th>
+          <th>ト音Lv5</th>
+          <th>ヘ音Lv5</th>
+        </tr>
+      </thead>
+      <tbody>`;
 
-  container.innerHTML = `
-    <div class="score-card">
-      <div class="score-card-title">📅 ${activeName} さんの練習記録 ${isSibling ? '（兄弟順位チェック有）' : ''}</div>
-      <div class="score-row"><span>今月の練習日数</span><strong>${days.length} 日</strong></div>
-      <div class="score-row"><span>総練習時間</span><strong>${mins}分 ${secs}秒</strong></div>
-      <div class="score-row"><span>6つのド テスト最高点</span><strong>${doScoreText}</strong></div>
-    </div>
-  `;
+    registeredProfiles.forEach(p => {
+      const days = JSON.parse(localStorage.getItem(`onpu_days_${p.idx}`)) || [];
+      const totalSec = parseInt(localStorage.getItem(`onpu_time_${p.idx}`)) || 0;
+      const mins = Math.floor(totalSec / 60);
+
+      const doBest = JSON.parse(localStorage.getItem(`onpu_best_${p.idx}_do_0`));
+      const tBest5 = JSON.parse(localStorage.getItem(`onpu_best_${p.idx}_treble_5`));
+      const bBest5 = JSON.parse(localStorage.getItem(`onpu_best_${p.idx}_bass_5`));
+
+      html += `<tr>
+        <td><strong>${p.name}</strong></td>
+        <td>${days.length}日</td>
+        <td>${mins}分</td>
+        <td>${doBest ? doBest.accuracy + '%' : '-'}</td>
+        <td>${tBest5 ? tBest5.accuracy + '%' : '-'}</td>
+        <td>${bBest5 ? bBest5.accuracy + '%' : '-'}</td>
+      </tr>`;
+    });
+
+    html += `</tbody></table></div>`;
+
+    // 各プレイヤーの詳細カード
+    registeredProfiles.forEach(p => {
+      const days = JSON.parse(localStorage.getItem(`onpu_days_${p.idx}`)) || [];
+      const totalSec = parseInt(localStorage.getItem(`onpu_time_${p.idx}`)) || 0;
+      const mins = Math.floor(totalSec / 60);
+      const secs = totalSec % 60;
+
+      html += `<div class="score-card">
+        <div class="score-card-title">👤 ${p.name} の詳細</div>
+        <div class="score-row"><span>今月の練習日数</span><strong>${days.length} 日</strong></div>
+        <div class="score-row"><span>総練習時間</span><strong>${mins}分 ${secs}秒</strong></div>
+      </div>`;
+    });
+  }
+
+  container.innerHTML = html;
   document.getElementById("scoreScreen").classList.remove("hidden");
 }
 
