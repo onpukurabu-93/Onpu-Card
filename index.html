@@ -56,24 +56,26 @@
     .btn-secondary { background-color: #1abc9c; color: white; }
     .btn-admin { background-color: #7f8c8d; color: white; margin-top: 15px; }
 
-    /* 五線カード表示（画面限界拡大） */
     .card-display-area {
       width: 100%;
-      height: 48vh;
-      max-height: 400px;
+      height: 52vh;
+      max-height: 440px;
       background-color: #ffffff;
       border: 3px solid #2c3e50;
       border-radius: 16px;
       display: flex;
       justify-content: center;
       align-items: center;
-      position: relative;
+      overflow: hidden;
       margin: 10px 0;
       box-shadow: 0 6px 12px rgba(0,0,0,0.15);
     }
-    canvas#staffCanvas { width: 98%; height: 98%; }
+    .card-display-area img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
 
-    /* 雲と数字の中央配置 */
     .cloud-container {
       position: relative;
       width: 180px;
@@ -95,7 +97,6 @@
       text-shadow: 2px 2px 0px #fff;
     }
 
-    /* 7色キーボード */
     .keyboard-container { display: flex; justify-content: space-between; width: 100%; margin-top: 8px; }
     .key-btn {
       flex: 1; margin: 0 2px; padding: 18px 0; border: none; border-radius: 8px;
@@ -136,13 +137,14 @@
         </select>
       </div>
 
+      <!-- 10問スタートに固定 -->
       <button class="btn btn-primary" onclick="startCourse(10)">10問コース スタート</button>
       <button class="btn btn-secondary" onclick="startCourse(20)">20問コース スタート</button>
 
       <button class="btn btn-admin" onclick="openAdmin()">🔒 管理・設定（先生用）</button>
     </div>
 
-    <!-- 2. レベル表紙（雲の中央数字） -->
+    <!-- 2. レベル表紙 -->
     <div id="screen-level-splash" class="screen">
       <h2 id="course-title-display">10問コース</h2>
       
@@ -164,7 +166,7 @@
       </div>
 
       <div class="card-display-area">
-        <canvas id="staffCanvas" width="400" height="320"></canvas>
+        <img id="cardImage" src="" alt="音符カード">
       </div>
 
       <div class="keyboard-container">
@@ -197,28 +199,23 @@
     <div id="screen-voice" class="screen">
       <h2>🎤 声でこたえよう！</h2>
       <p style="margin-top:5px; color:#555;">ド・レ・ミでうたってみてね！</p>
-
       <div class="card-display-area" style="height:30vh;">
         <div style="text-align:center;">
           <p style="font-size:1.2rem; font-weight:bold;">課題曲：チューリップ</p>
-          <p style="margin-top:10px; color:#7f8c8d;">「ド レ ミ ...」</p>
         </div>
       </div>
-
       <button class="btn btn-admin" onclick="showScreen('screen-top')">トップに戻る</button>
     </div>
 
   </div>
 
   <script>
-    // ブラウザの音声初期化
     async function unlockAudio() {
       if (Tone.context.state !== 'running') {
         await Tone.start();
       }
     }
 
-    // ピアノ風合成音色（即時・確実に鳴る設定）
     const pianoSynth = new Tone.PolySynth(Tone.Synth, {
       oscillator: { type: "triangle" },
       envelope: { attack: 0.005, decay: 1.2, sustain: 0, release: 1.2 }
@@ -226,18 +223,31 @@
 
     const noteToPitch = { 'ド': 'C4', 'レ': 'D4', 'ミ': 'E4', 'ファ': 'F4', 'ソ': 'G4', 'ラ': 'A4', 'シ': 'B4' };
 
+    /* 先生のカード画像リスト構造（固定） */
+    const cardsData = [
+      { name: 'ド', src: 'do.png' },
+      { name: 'レ', src: 're.png' },
+      { name: 'ミ', src: 'mi.png' },
+      { name: 'ファ', src: 'fa.png' },
+      { name: 'ソ', src: 'so.png' },
+      { name: 'ラ', src: 'la.png' },
+      { name: 'シ', src: 'si.png' }
+    ];
+
     function playPianoSound(note) {
       unlockAudio();
       const pitch = noteToPitch[note] || 'C4';
       pianoSynth.triggerAttackRelease(pitch, '8n');
     }
 
+    // 初期コースは10問でスタート
     let currentCourse = 10;
     let currentLevel = 1;
     let currentQuestionIndex = 0;
     let correctCount = 0;
     let startTime = 0;
     let timerInterval = null;
+    let currentCard = null;
 
     function showScreen(screenId) {
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -253,7 +263,7 @@
       }
     }
 
-    async function startCourse(numQuestions) {
+    async function startCourse(numQuestions = 10) {
       await unlockAudio();
       currentCourse = numQuestions;
       currentLevel = 1;
@@ -286,56 +296,6 @@
       document.getElementById('game-timer').innerText = `${elapsed}s`;
     }
 
-    function drawStaff(noteName) {
-      const canvas = document.getElementById('staffCanvas');
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      const startY = 110;
-      const step = 22;
-      ctx.strokeStyle = '#2c3e50';
-      ctx.lineWidth = 2.5;
-
-      for (let i = 0; i < 5; i++) {
-        ctx.beginPath();
-        ctx.moveTo(25, startY + i * step);
-        ctx.lineTo(canvas.width - 25, startY + i * step);
-        ctx.stroke();
-      }
-
-      const noteYMap = {
-        'ド': startY + 5 * step,
-        'レ': startY + 4.5 * step,
-        'ミ': startY + 4 * step,
-        'ファ': startY + 3.5 * step,
-        'ソ': startY + 3 * step,
-        'ラ': startY + 2.5 * step,
-        'シ': startY + 2 * step
-      };
-
-      const targetY = noteYMap[noteName] || (startY + 3 * step);
-      const noteX = canvas.width / 2;
-
-      if (noteName === 'ド') {
-        ctx.beginPath();
-        ctx.moveTo(noteX - 28, targetY);
-        ctx.lineTo(noteX + 28, targetY);
-        ctx.stroke();
-      }
-
-      ctx.fillStyle = '#000';
-      ctx.beginPath();
-      ctx.ellipse(noteX, targetY, 15, 11, -0.25, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.beginPath();
-      ctx.lineWidth = 2.5;
-      ctx.moveTo(noteX + 14, targetY);
-      ctx.lineTo(noteX + 14, targetY - 60);
-      ctx.stroke();
-    }
-
-    let currentNote = 'ド';
     function nextQuestion() {
       if (currentQuestionIndex >= currentCourse) {
         finishGame();
@@ -344,13 +304,13 @@
       currentQuestionIndex++;
       document.getElementById('game-progress').innerText = `問題 ${currentQuestionIndex} / ${currentCourse}`;
       
-      const notes = ['ド', 'レ', 'ミ', 'ファ', 'ソ', 'ラ', 'シ'];
-      currentNote = notes[Math.floor(Math.random() * notes.length)];
-      drawStaff(currentNote);
+      currentCard = cardsData[Math.floor(Math.random() * cardsData.length)];
+      const imgElem = document.getElementById('cardImage');
+      imgElem.src = currentCard.src;
     }
 
     function handleAnswer(selectedNote) {
-      if (selectedNote === currentNote) {
+      if (selectedNote === currentCard.name) {
         correctCount++;
         playPianoSound(selectedNote);
       }
