@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Onpu Cards - 音符カード（ピアノ教室用教具）</title>
-  <!-- Tone.js（高品質ピアノ音源ライブラリ）の読み込み -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
@@ -26,7 +25,6 @@
       padding: 12px 0;
       font-size: 1.2rem;
       font-weight: bold;
-      letter-spacing: 1px;
     }
     .container {
       width: 100%;
@@ -58,7 +56,7 @@
     .btn-secondary { background-color: #1abc9c; color: white; }
     .btn-admin { background-color: #7f8c8d; color: white; margin-top: 15px; }
 
-    /* 五線カード表示（画面ギリギリ最大化＋視認性重視） */
+    /* 五線カード表示（画面限界拡大） */
     .card-display-area {
       width: 100%;
       height: 48vh;
@@ -116,9 +114,8 @@
       text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 15px;
     }
     .badge { display: inline-block; padding: 6px 16px; border-radius: 20px; font-weight: bold; }
-    .badge-perfect { background-color: #f1c40f; color: #000; font-size: 1.3rem; animation: pulse 1s infinite; }
+    .badge-perfect { background-color: #f1c40f; color: #000; font-size: 1.3rem; }
     .badge-great { background-color: #e74c3c; color: #fff; font-size: 1.1rem; }
-    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.06); } 100% { transform: scale(1); } }
   </style>
 </head>
 <body>
@@ -127,7 +124,7 @@
 
   <div class="container">
 
-    <!-- 1. プレイヤー選択画面 -->
+    <!-- 1. トップ画面 -->
     <div id="screen-top" class="screen active">
       <h2 style="margin: 15px 0;">せいとさんをえらんでね</h2>
       
@@ -208,34 +205,31 @@
         </div>
       </div>
 
-      <div style="font-size:1.2rem; font-weight:bold; margin:15px 0; color:#27ae60;" id="mic-status-text">マイク準備完了</div>
-      <button class="btn btn-secondary" onclick="alert('音声認識を開始します')">🎤 マイクスタート</button>
       <button class="btn btn-admin" onclick="showScreen('screen-top')">トップに戻る</button>
     </div>
 
   </div>
 
   <script>
-    /* プロ仕様グランドピアノ音源（Salamander Grand Piano）のロード */
-    const piano = new Tone.Sampler({
-      urls: {
-        A0: "A0.mp3", C1: "C1.mp3", D#1: "Ds1.mp3", F#1: "Fs1.mp3", A1: "A1.mp3",
-        C2: "C2.mp3", D#2: "Ds2.mp3", F#2: "Fs2.mp3", A2: "A2.mp3", C3: "C3.mp3",
-        D#3: "Ds3.mp3", F#3: "Fs3.mp3", A3: "A3.mp3", C4: "C4.mp3", D#4: "Ds4.mp3",
-        F#4: "Fs4.mp3", A4: "A4.mp3", C5: "C5.mp3", D#5: "Ds5.mp3", F#5: "Fs5.mp3",
-        A5: "A5.mp3", C6: "C6.mp3", D#6: "Ds6.mp3", F#6: "Fs6.mp3", A6: "A6.mp3", C7: "C7.mp3"
-      },
-      baseUrl: "https://tonejs.github.io/audio/salamander/"
+    // ブラウザの音声初期化
+    async function unlockAudio() {
+      if (Tone.context.state !== 'running') {
+        await Tone.start();
+      }
+    }
+
+    // ピアノ風合成音色（即時・確実に鳴る設定）
+    const pianoSynth = new Tone.PolySynth(Tone.Synth, {
+      oscillator: { type: "triangle" },
+      envelope: { attack: 0.005, decay: 1.2, sustain: 0, release: 1.2 }
     }).toDestination();
 
     const noteToPitch = { 'ド': 'C4', 'レ': 'D4', 'ミ': 'E4', 'ファ': 'F4', 'ソ': 'G4', 'ラ': 'A4', 'シ': 'B4' };
 
     function playPianoSound(note) {
-      if (Tone.context.state !== 'running') {
-        Tone.start();
-      }
+      unlockAudio();
       const pitch = noteToPitch[note] || 'C4';
-      piano.triggerAttackRelease(pitch, '1n'); // 豊かなグランドピアノの余韻
+      pianoSynth.triggerAttackRelease(pitch, '8n');
     }
 
     let currentCourse = 10;
@@ -259,7 +253,8 @@
       }
     }
 
-    function startCourse(numQuestions) {
+    async function startCourse(numQuestions) {
+      await unlockAudio();
       currentCourse = numQuestions;
       currentLevel = 1;
       showLevelSplash();
@@ -291,7 +286,6 @@
       document.getElementById('game-timer').innerText = `${elapsed}s`;
     }
 
-    /* 教具として美しく見やすい五線カード描画 */
     function drawStaff(noteName) {
       const canvas = document.getElementById('staffCanvas');
       const ctx = canvas.getContext('2d');
@@ -322,7 +316,6 @@
       const targetY = noteYMap[noteName] || (startY + 3 * step);
       const noteX = canvas.width / 2;
 
-      // 下加線
       if (noteName === 'ド') {
         ctx.beginPath();
         ctx.moveTo(noteX - 28, targetY);
@@ -330,13 +323,11 @@
         ctx.stroke();
       }
 
-      // 音符の頭
       ctx.fillStyle = '#000';
       ctx.beginPath();
       ctx.ellipse(noteX, targetY, 15, 11, -0.25, 0, Math.PI * 2);
       ctx.fill();
 
-      // ぼう
       ctx.beginPath();
       ctx.lineWidth = 2.5;
       ctx.moveTo(noteX + 14, targetY);
@@ -361,9 +352,7 @@
     function handleAnswer(selectedNote) {
       if (selectedNote === currentNote) {
         correctCount++;
-        playPianoSound(selectedNote); // 生グランドピアノの響き
-      } else {
-        // ミス時
+        playPianoSound(selectedNote);
       }
       nextQuestion();
     }
