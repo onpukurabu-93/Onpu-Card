@@ -63,6 +63,9 @@
     .btn:active {
       transform: scale(0.98);
     }
+    .btn-secondary {
+      background: #7ED321;
+    }
     .btn-outline {
       background: #fff;
       color: #4A90E2;
@@ -78,8 +81,8 @@
     /* タイトル画面 */
     .title-area {
       text-align: center;
-      margin-top: 20px;
-      margin-bottom: 20px;
+      margin-top: 15px;
+      margin-bottom: 15px;
     }
     .main-title {
       font-size: 28px;
@@ -94,12 +97,12 @@
     .player-select-box {
       background: #f0f4f8;
       border-radius: 12px;
-      padding: 12px;
-      margin-bottom: 16px;
+      padding: 10px;
+      margin-bottom: 12px;
       text-align: center;
     }
     .player-select-box select {
-      padding: 8px 12px;
+      padding: 6px 12px;
       font-size: 16px;
       border-radius: 8px;
       border: 1px solid #ccc;
@@ -182,7 +185,7 @@
     .arrow-left { left: 8px; }
     .arrow-right { right: 8px; }
 
-    /* 鍵盤エリア */
+    /* 鍵盤エリア（ド〜シの7個） */
     .keyboard {
       display: flex;
       justify-content: space-between;
@@ -192,17 +195,48 @@
     .key-btn {
       flex: 1;
       height: 60px;
-      background: #fff;
       border: 2px solid #333;
       border-radius: 0 0 6px 6px;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: bold;
+      color: #fff;
       cursor: pointer;
       box-shadow: 0 3px 0 #333;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
     }
     .key-btn:active {
       transform: translateY(3px);
       box-shadow: none;
+    }
+    /* 7色ボタンカラー指定（シ＝ピンク） */
+    .key-do   { background-color: #E74C3C; }
+    .key-re   { background-color: #E67E22; }
+    .key-mi   { background-color: #F1C40F; }
+    .key-fa   { background-color: #2ECC71; }
+    .key-so   { background-color: #1ABC9C; }
+    .key-ra   { background-color: #3498DB; }
+    .key-si   { background-color: #E91E63; } /* ピンク */
+
+    /* モーダル表示 */
+    .modal-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+    .modal-content {
+      background: #fff;
+      width: 85%;
+      padding: 20px;
+      border-radius: 12px;
+      max-height: 80%;
+      overflow-y: auto;
     }
 
     /* レポート・保護者画面用スタイル */
@@ -244,7 +278,6 @@
 <body>
 
 <div class="container">
-  <!-- 音源 -->
   <audio id="sharedAudio" preload="auto"></audio> 
   <audio id="correctAudio" preload="auto" src="seikai.mp3"></audio>
 
@@ -252,10 +285,10 @@
   <div id="screenTitle" class="screen">
     <div class="title-area">
       <div class="main-title">おんぷカード</div>
-      <div class="main-subtitle">楽しく音符を覚えよう！</div>
+      <div class="main-subtitle">音符を見て、読んでみよう</div>
     </div>
 
-    <!-- プレイヤー切替（ちゃたろう, くろまる, サブロー） -->
+    <!-- プレイヤー切替 -->
     <div class="player-select-box">
       <label for="playerSelect">👤 プレイヤー:</label>
       <select id="playerSelect" onchange="changeMainPlayer(this.value)">
@@ -265,6 +298,15 @@
       </select>
     </div>
 
+    <!-- はじめに ＆ 6つのド -->
+    <button class="btn btn-outline" style="background-color: #FFF8E1; border-color: #FFC107; color: #333;" onclick="openIntroModal()">
+      📖 はじめに（つかいかた）
+    </button>
+    <button class="btn btn-secondary" onclick="startDoLesson()">
+      🎵 6つの「ド」をおぼえよう！
+    </button>
+
+    <!-- 記号選択 -->
     <button class="btn" onclick="selectClef('treble')">ト音記号</button>
     <button class="btn" onclick="selectClef('bass')">ヘ音記号</button>
     <button class="btn" onclick="selectClef('all')">全カード</button>
@@ -285,7 +327,7 @@
     <div id="levelList"></div>
   </div>
 
-  <!-- 3. カード表示・学習画面（通常・トレーニング） -->
+  <!-- 3. カード表示・学習画面 -->
   <div id="screenCard" class="screen hidden">
     <div class="header">
       <button class="btn btn-back" onclick="showScreen('screenLevel')">＜ 戻る</button>
@@ -297,7 +339,7 @@
       <button class="arrow arrow-left" onclick="previousCard()">‹</button>
 
       <div class="note-card-wrap">
-        <img id="noteCardImg" class="note-card-img" src="" alt="音符カード">
+        <img id="noteCardImg" class="note-card-img" src="Level_start.png" alt="音符カード">
         <div id="trainingCover" class="training-cover hidden"></div>
       </div>
 
@@ -306,15 +348,15 @@
       <button class="arrow arrow-right" onclick="nextCard()">›</button>
     </div>
 
-    <!-- 鍵盤エリア -->
+    <!-- 鍵盤エリア（ド〜シの7個／シはピンク） -->
     <div class="keyboard">
-      <button class="key-btn" onclick="pressKey('ド', this)">ド</button>
-      <button class="key-btn" onclick="pressKey('レ', this)">レ</button>
-      <button class="key-btn" onclick="pressKey('ミ', this)">ミ</button>
-      <button class="key-btn" onclick="pressKey('ファ', this)">ファ</button>
-      <button class="key-btn" onclick="pressKey('ソ', this)">ソ</button>
-      <button class="key-btn" onclick="pressKey('ラ', this)">ラ</button>
-      <button class="key-btn" onclick="pressKey('シ', this)">シ</button>
+      <button class="key-btn key-do" onclick="pressKey('ド', this)">ド</button>
+      <button class="key-btn key-re" onclick="pressKey('レ', this)">レ</button>
+      <button class="key-btn key-mi" onclick="pressKey('ミ', this)">ミ</button>
+      <button class="key-btn key-fa" onclick="pressKey('ファ', this)">ファ</button>
+      <button class="key-btn key-so" onclick="pressKey('ソ', this)">ソ</button>
+      <button class="key-btn key-ra" onclick="pressKey('ラ', this)">ラ</button>
+      <button class="key-btn key-si" onclick="pressKey('シ', this)">シ</button>
     </div>
   </div>
 
@@ -337,7 +379,7 @@
     </div>
   </div>
 
-  <!-- 5. 🔒 保護者専用メニュー（音符カード・鍵盤を完全除去） -->
+  <!-- 5. 🔒 保護者専用メニュー -->
   <div id="screenParent" class="screen hidden">
     <div class="header">
       <button class="btn btn-back" onclick="showScreen('screenTitle')">＜ トップへ戻る</button>
@@ -355,7 +397,6 @@
       </select>
     </div>
 
-    <!-- 個別レポート（切り替えで連動） -->
     <div class="report-card">
       <div class="report-title">💡 今週の声かけヒント</div>
       <div class="advice-box">
@@ -380,7 +421,6 @@
       </div>
     </div>
 
-    <!-- きょうだい成績比較（一括比較） -->
     <div class="report-card" style="border-top: 2px solid #4A90E2; margin-top: 15px; padding-top: 12px;">
       <div class="report-title">👨‍👩‍👧‍👦 プレイヤー成績比較一覧</div>
       <p style="font-size: 13px;">・ちゃたろう: ベスト 12秒 / 正答率 95%</p>
@@ -388,6 +428,21 @@
       <p style="font-size: 13px; margin-top: 2px;">・サブロー: ベスト 18秒 / 正答率 85%</p>
     </div>
   </div>
+
+  <!-- はじめに モーダル -->
+  <div id="introModal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <h3 style="text-align: center; margin-bottom: 10px;">📖 つかいかた</h3>
+      <p style="font-size: 14px; line-weight: 1.5; color: #444;">
+        1. プレイヤーを「ちゃたろう・くろまる・サブロー」から選びます。<br>
+        2. 「ト音記号」や「ヘ音記号」を選んで学習スタート！<br>
+        3. カードに表示された音符と同じ鍵盤ボタンを押しましょう。<br>
+        4. トレーニングモードでは、音符を隠して耳と感触で覚える練習ができます。
+      </p>
+      <button class="btn" style="width: 100%; margin-top: 15px;" onclick="closeIntroModal()">とじる</button>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -395,28 +450,34 @@
   let currentScreen = 'screenTitle';
   let currentPlayerIndex = 0;
   let isTraining = false;
-  
-  // 認証保持フラグ（1度通ればアプリ起動中は再入力不要）
   let isParentAuthenticated = false;
 
-  // 画面切替処理
   function showScreen(screenId) {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
     document.getElementById(screenId).classList.remove('hidden');
     currentScreen = screenId;
   }
 
-  // トップ画面でのプレイヤー切替
   function changeMainPlayer(val) {
     currentPlayerIndex = parseInt(val);
     const name = playerNames[currentPlayerIndex];
     document.getElementById('myRankText').innerText = `現在の順位 (${name}): ${currentPlayerIndex + 1}位`;
-    // 保護者画面のドロップダウンも同期
     document.getElementById('parentPlayerSelect').value = val;
     switchParentPlayer(val);
   }
 
-  // 🔒 保護者専用メニューを開く処理（パスコード保持機能）
+  function openIntroModal() {
+    document.getElementById('introModal').classList.remove('hidden');
+  }
+
+  function closeIntroModal() {
+    document.getElementById('introModal').classList.add('hidden');
+  }
+
+  function startDoLesson() {
+    alert("6つの「ド」をおぼえるレッスンを準備中です！");
+  }
+
   function openParentMenu() {
     if (isParentAuthenticated) {
       showScreen('screenParent');
@@ -425,22 +486,18 @@
 
     const pass = prompt("保護者専用暗証番号を入力してください (初期値: 0000):");
     if (pass === "0000") {
-      isParentAuthenticated = true; // 認証を保持
+      isParentAuthenticated = true;
       showScreen('screenParent');
     } else if (pass !== null) {
       alert("暗証番号が正しくありません。");
     }
   }
 
-  // 保護者メニュー内でのプレイヤー切替
   function switchParentPlayer(val) {
     const idx = parseInt(val);
     const selectedName = playerNames[idx];
-    
-    // 画面内テキストの連動更新
     document.getElementById('certPlayerName').innerText = selectedName + " 殿";
     
-    // プレイヤーごとの得意・苦手表示切替（例）
     const reportElem = document.getElementById('parentReportText');
     if (idx === 0) {
       reportElem.innerHTML = '<p style="font-size: 13px; color: #27AE60;">◎ 得意: 「ド」「ミ」の読み取りは完璧です！</p><p style="font-size: 13px; color: #E74C3C; margin-top: 4px;">▲ 苦手: 「ファ」「ソ」で少し迷う傾向があります。</p>';
@@ -451,7 +508,6 @@
     }
   }
 
-  // 音符選択・レベル選択
   function selectClef(clef) {
     const list = document.getElementById('levelList');
     list.innerHTML = '';
@@ -469,7 +525,6 @@
     showScreen('screenLevel');
   }
 
-  // トレーニング切り替え
   function startTraining() {
     isTraining = !isTraining;
     const cover = document.getElementById('trainingCover');
@@ -485,7 +540,6 @@
     }
   }
 
-  // 鍵盤クリック処理
   function pressKey(note, btnElem) {
     const circle = document.getElementById('correctCircle');
     const correctAudio = document.getElementById('correctAudio');
@@ -510,4 +564,3 @@
 </script>
 </body>
 </html>
-、
